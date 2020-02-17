@@ -9,4 +9,8 @@
 </ul>
 
 ## Notes
-The .gitignore file stops all makefiles and .class files from being synced
+<ul>
+  <li>The .gitignore file stops all makefiles and .class files from being synced</li>
+  <li>There is a new folder named BigT which is the exact copy of heap. The file names and everything else shall be updated as we progress</li>
+  <li>The main MakeFile does not make BigT for now. Once we have some compilable code, we will have to include that as well</li>
+</ul>
