@@ -181,7 +181,7 @@ public class Map implements GlobalConst{
    *   @param val the string value to be set as row label
    *   @exception IOException I/O exceptions
    */
-   public Map setRowLabel(String val){
+   public Map setRowLabel(String val) throws IOException{
 
     Convert.setStrValue(val, map_offset+4, data);
     return this;
@@ -191,7 +191,7 @@ public class Map implements GlobalConst{
    *   @param val the string value to be set as column label
    *   @exception IOException I/O exceptions
    */
-   public Map setColumnLabel(String val){
+   public Map setColumnLabel(String val) throws IOException{
 
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE, data);
     return this;
@@ -201,7 +201,7 @@ public class Map implements GlobalConst{
    *   @param val the int value to be set as column label
    *   @exception IOException I/O exceptions
    */
-   public Map setTimeStamp(int val){
+   public Map setTimeStamp(int val) throws IOException{
 
     Convert.setIntValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE, data);
     return this;
@@ -210,10 +210,13 @@ public class Map implements GlobalConst{
    /** set the map value
    *   @param val the string value to be set as map value
    *   @exception IOException I/O exceptions
+   *   @exception InvalidMapSizeException Map size too big
    */
-   public Map setValue(String val){
+   public Map setValue(String val) throws IOException{
     map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length();
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data);
+
+    if(map_length>max_size) throw InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR")
     return this;
    }
 
