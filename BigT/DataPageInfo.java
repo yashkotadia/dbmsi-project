@@ -18,15 +18,17 @@ class DataPageInfo implements GlobalConst{
   /** HFPage returns int for avail space, so we use int here */
   int    availspace; 
   
-  /** for efficient implementation of getRecCnt() */
-  int    recct;    
+  /** for efficient implementation of getMapCnt(), getRowCnt(), getColcnt() */
+  int    mapct;
+  int rowct;
+  int colct;    
   
   /** obvious: id of this particular data page (a HFPage) */
   PageId pageId = new PageId();   
     
   /** auxiliary fields of DataPageInfo */
 
-  public static final int size = 12;// size of DataPageInfo object in bytes
+  public static final int size = 20;// size of DataPageInfo object in bytes
 
   private byte [] data;  // a data buffer
   
@@ -45,9 +47,11 @@ class DataPageInfo implements GlobalConst{
    */
   public DataPageInfo()
   {  
-    data = new byte[12]; // size of datapageinfo
+    data = new byte[20]; // size of datapageinfo
     int availspace = 0;
-    recct =0;
+    mapct =0;
+    rowct = 0;
+    colct = 0;
     pageId.pid = INVALID_PAGE;
     offset = 0;
   }
@@ -76,7 +80,7 @@ class DataPageInfo implements GlobalConst{
        throws InvalidTupleSizeException, IOException
   {   
      // need check _atuple size == this.size ?otherwise, throw new exception
-    if (_atuple.getLength()!=12){
+    if (_atuple.getLength()!=20){
       throw new InvalidTupleSizeException(null, "HEAPFILE: TUPLE SIZE ERROR");
     }
 
@@ -85,9 +89,11 @@ class DataPageInfo implements GlobalConst{
       offset = _atuple.getOffset();
       
       availspace = Convert.getIntValue(offset, data);
-      recct = Convert.getIntValue(offset+4, data);
+      mapct = Convert.getIntValue(offset+4, data);
       pageId = new PageId();
       pageId.pid = Convert.getIntValue(offset+8, data);
+      rowct = Convert.getIntValue(offset+ 12, data);
+      colct = Convert.getIntValue(offset+16, data);
       
     }
   }
@@ -101,10 +107,12 @@ class DataPageInfo implements GlobalConst{
        throws IOException
   {
 
-    // 1) write availspace, recct, pageId into data []
+    // 1) write availspace, mapctct, pageId, rowct, colct into data []
     Convert.setIntValue(availspace, offset, data);
-    Convert.setIntValue(recct, offset+4, data);
+    Convert.setIntValue(mapct, offset+4, data);
     Convert.setIntValue(pageId.pid, offset+8, data);
+    Convert.setIntValue(rowct, offset+12, data);
+    Convert.setIntValue(colct, offset+16, data);
 
 
     // 2) creat a Tuple object using this array
@@ -116,16 +124,18 @@ class DataPageInfo implements GlobalConst{
   }
   
     
-  /** write this object's useful fields(availspace, recct, pageId) 
+  /** write this object's useful fields(availspace, mapct, pageId, rowct, colct) 
    *  to the data[](may be in buffer pool)
    *  
    */
   public void flushToTuple() throws IOException
   {
-     // write availspace, recct, pageId into "data[]"
+     // write availspace, mapct, pageId, rowct, colct into "data[]"
     Convert.setIntValue(availspace, offset, data);
-    Convert.setIntValue(recct, offset+4, data);
+    Convert.setIntValue(mapct, offset+4, data);
     Convert.setIntValue(pageId.pid, offset+8, data);
+    Convert.setIntValue(rowct, offset+12, data);
+    Convert.setIntValue(colct, offset+16, data);
 
     // here we assume data[] already points to buffer pool
   
