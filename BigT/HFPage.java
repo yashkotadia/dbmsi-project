@@ -1,6 +1,5 @@
 /* File HFPage.java */
-
-package heap;
+package BigT;
 
 import java.io.*;
 import java.lang.*;
@@ -8,7 +7,7 @@ import java.lang.*;
 import global.*;
 import diskmgr.*;
 
-
+import heap.Tuple;
 
  /**
   * Define constant values for INVALID_SLOT and EMPTY_SLOT
@@ -394,6 +393,80 @@ public class HFPage extends Page
 	return   rid ;
       }
     } 
+
+
+
+
+/**
+   * inserts a new map onto the page, returns MID of this map 
+   * @param	map 	a map to be inserted
+   * @return	MID of record, null if sufficient space does not exist
+   * @exception IOException I/O errors
+   * in C++ Status insertMap(char *mapPtr, int mapLen, MID& mid)
+   */
+  public MID insertMap ( byte [] map)		
+    throws IOException
+    {
+      MID mid = new MID();
+      
+      int mapLen = map.length;
+      int spaceNeeded = mapLen + SIZE_OF_SLOT;
+      
+      // Start by checking if sufficient space exists.
+      // This is an upper bound check. May not actually need a slot
+      // if we can find an empty one.
+      
+      freeSpace = Convert.getShortValue (FREE_SPACE, data);
+      if (spaceNeeded > freeSpace) {
+        return null;
+	
+      } else {
+	
+	// look for an empty slot
+	slotCnt = Convert.getShortValue (SLOT_CNT, data); 
+	int i; 
+	short length;
+	for (i= 0; i < slotCnt; i++) 
+	  {
+	    length = getSlotLength(i); 
+	    if (length == EMPTY_SLOT)
+	      break;
+	  }
+	
+	if(i == slotCnt)   //use a new slot
+	  {           
+	    // adjust free space        
+	    freeSpace -= spaceNeeded;
+	    Convert.setShortValue (freeSpace, FREE_SPACE, data);
+	    
+	    slotCnt++;
+	    Convert.setShortValue (slotCnt, SLOT_CNT, data);
+	    
+	  }
+	else {
+	  // reusing an existing slot
+	  freeSpace -= mapLen;
+	  Convert.setShortValue (freeSpace, FREE_SPACE, data);
+	}
+        
+	usedPtr = Convert.getShortValue (USED_PTR, data);
+        usedPtr -= mapLen;    // adjust usedPtr
+	Convert.setShortValue (usedPtr, USED_PTR, data);
+	
+	//insert the slot info onto the data page
+	setSlot(i, mapLen, usedPtr);   
+	
+	// insert data onto the data page
+	System.arraycopy (map, 0, data, usedPtr, mapLen);
+	curPage.pid = Convert.getIntValue (CUR_PAGE, data);
+	mid.pageNo.pid = curPage.pid;
+	mid.slotNo = i;
+	return  mid ;
+      }
+    }
+
+
+
   
   /**
    * delete the record with the specified rid
@@ -458,6 +531,70 @@ public class HFPage extends Page
       }
     }
   
+/**
+   * delete the map with the specified mid
+   * @param	mid 	the map ID
+   * @exception	InvalidSlotNumberException Invalid slot number
+   * @exception IOException I/O errors
+   * in C++ Status deleteRecord(const MID& mid)
+   */
+  public void deleteMap ( MID mid )
+    throws IOException,  
+	   InvalidSlotNumberException
+    {
+      int slotNo = mid.slotNo;
+      short mapLen = getSlotLength (slotNo);
+      slotCnt = Convert.getShortValue (SLOT_CNT, data);
+      
+      // first check if the map being deleted is actually valid
+      if ((slotNo >= 0) && (slotNo < slotCnt) && (mapLen > 0))
+	{ 
+	  // The records always need to be compacted, as they are
+	  // not necessarily stored on the page in the order that
+	  // they are listed in the slot index.
+	  
+	  // offset of record being deleted
+	  int offset = getSlotOffset(slotNo); 
+	  usedPtr = Convert.getShortValue (USED_PTR, data);
+	  int newSpot= usedPtr + mapLen;
+	  int size = offset - usedPtr;
+	  
+	  // shift bytes to the right
+	  System.arraycopy(data, usedPtr, data, newSpot, size);
+	  
+	  // now need to adjust offsets of all valid slots that refer
+	  // to the left of the map being removed. (by the size of the hole)
+	  
+	  int i, n, chkoffset;
+	  for (i = 0, n = DPFIXED; i < slotCnt; n +=SIZE_OF_SLOT, i++) {
+	    if ((getSlotLength(i) >= 0))
+	      {
+		chkoffset = getSlotOffset(i);
+		if(chkoffset < offset)
+		  {
+		    chkoffset += mapLen;
+		    Convert.setShortValue((short)chkoffset, n+2, data);
+		  }
+	      }
+	  }
+	  
+	  // move used Ptr forwar
+	  usedPtr += mapLen;   
+	  Convert.setShortValue (usedPtr, USED_PTR, data);
+	  
+	  // increase freespace by size of hole
+	  freeSpace = Convert.getShortValue(FREE_SPACE, data);
+	  freeSpace += mapLen;  
+	  Convert.setShortValue (freeSpace, FREE_SPACE, data);
+	  
+	  setSlot(slotNo, EMPTY_SLOT, 0);  // mark slot free
+	} 
+      else {
+	throw new InvalidSlotNumberException (null, "HEAPFILE: INVALID_SLOTNO");
+      }
+    }
+
+
   /**
    * @return RID of first record on page, null if page contains no records.  
    * @exception  IOException I/O errors
@@ -493,6 +630,46 @@ public class HFPage extends Page
       
       return rid;
     }
+
+
+/**
+   * @return MID of first record on page, null if page contains no maps.  
+   * @exception  IOException I/O errors
+   * in C++ Status firstMap(MID& firstMid)
+   * 
+   */ 
+  public MID firstMap() 
+    throws IOException
+    {
+      MID mid = new MID();
+      // find the first non-empty slot
+      
+      
+      slotCnt = Convert.getShortValue (SLOT_CNT, data);
+      
+      int i;
+      short length;
+      for (i= 0; i < slotCnt; i++)
+	{
+	  length = getSlotLength (i);
+	  if (length != EMPTY_SLOT)
+	    break;
+	}
+      
+      if(i== slotCnt)
+	return null;
+      
+      // found a non-empty slot
+      
+      mid.slotNo = i;
+      curPage.pid= Convert.getIntValue(CUR_PAGE, data);
+      mid.pageNo.pid = curPage.pid;
+      
+      return mid;
+    }
+
+
+
   
   /**
    * @return RID of next record on the page, null if no more 
@@ -529,7 +706,50 @@ public class HFPage extends Page
       
       return rid;
     }
-  
+
+
+
+  /**
+   * @return MID of next map on the page, null if no more 
+   * maps exist on the page
+   * @param 	curMid	current record ID
+   * @exception  IOException I/O errors
+   * in C++ Status nextRecord (MID curMid, MID& nextMid)
+   */
+  public MID nextMap (MID curMid) 
+    throws IOException 
+    {
+      MID mid = new MID();
+      slotCnt = Convert.getShortValue (SLOT_CNT, data);
+      
+      int i=curMid.slotNo;
+      short length; 
+      
+      // find the next non-empty slot
+      for (i++; i < slotCnt;  i++)
+	{
+	  length = getSlotLength(i);
+	  if (length != EMPTY_SLOT)
+	    break;
+	}
+      
+      if(i >= slotCnt)
+	return null;
+      
+      // found a non-empty slot
+      
+      mid.slotNo = i;
+      curPage.pid = Convert.getIntValue(CUR_PAGE, data);
+      mid.pageNo.pid = curPage.pid;
+      
+      return mid;
+    }
+
+
+
+
+
+
   /**
    * copies out record with RID rid into record pointer.
    * <br>
@@ -571,6 +791,52 @@ public class HFPage extends Page
      
       
     }
+
+
+
+  /**
+   * copies out map with MID mid into map pointer.
+   * <br>
+   * Status getMap(MID mid, char *mapPtr, int& mapLen)
+   * @param	mid 	the map ID
+   * @return 	a map contains the map
+   * @exception   InvalidSlotNumberException Invalid slot number
+   * @exception  	IOException I/O errors
+   * @see 	Map
+   */
+  public Map getMap ( MID mid ) 
+    throws IOException,  
+	   InvalidSlotNumberException
+    {
+      short mapLen;
+      short offset;
+      byte []record;
+      PageId pageNo = new PageId();
+      pageNo.pid= mid.pageNo.pid;
+      curPage.pid = Convert.getIntValue (CUR_PAGE, data);
+      int slotNo = mid.slotNo;
+      
+      // length of record being returned
+      mapLen = getSlotLength (slotNo);
+      slotCnt = Convert.getShortValue (SLOT_CNT, data);
+      if (( slotNo >=0) && (slotNo < slotCnt) && (mapLen >0) 
+	  && (pageNo.pid == curPage.pid))
+	{
+	  offset = getSlotOffset (slotNo);
+	  map = new byte[mapLen];
+	  System.arraycopy(data, offset, map, 0, mapLen);
+	  Map amap = new Map(map, 0, mapLen);
+	  return amap;
+	}
+      
+      else {
+        throw new InvalidSlotNumberException (null, "HEAPFILE: INVALID_SLOTNO");
+      }
+     
+      
+    }
+
+
   
   /**
    * returns a tuple in a byte array[pageSize] with given RID rid.
@@ -612,6 +878,54 @@ public class HFPage extends Page
       }
       
     }
+
+
+
+
+
+  /**
+   * returns a map in a byte array[pageSize] with given MID mid.
+   * <br>
+   * in C++	Status returnMap(MID mid, char*& mapPtr, int& mapLen)
+   * @param       mid     the map ID
+   * @return      a map  with its length and offset in the byte array
+   * @exception   InvalidSlotNumberException Invalid slot number
+   * @exception   IOException I/O errors
+   * @see 	Map
+   */  
+  public Map returnMap ( MID mid )
+    throws IOException, 
+	   InvalidSlotNumberException
+    {
+      short mapLen;
+      short offset;
+      PageId pageNo = new PageId();
+      pageNo.pid = mid.pageNo.pid;
+      
+      curPage.pid = Convert.getIntValue (CUR_PAGE, data);
+      int slotNo = mid.slotNo;
+      
+      // length of record being returned
+      mapLen = getSlotLength (slotNo);
+      slotCnt = Convert.getShortValue (SLOT_CNT, data);
+      
+      if (( slotNo >=0) && (slotNo < slotCnt) && (mapLen >0)
+	  && (pageNo.pid == curPage.pid))
+	{
+	  
+	  offset = getSlotOffset (slotNo);
+	  Map amap = new Map(data, offset, mapLen);
+	  return amap;
+	}
+      
+      else {   
+        throw new InvalidSlotNumberException (null, "HEAPFILE: INVALID_SLOTNO");
+      }
+      
+    }
+
+
+
   
   /**
    * returns the amount of available space on the page.
