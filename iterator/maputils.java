@@ -29,8 +29,8 @@ public class maputils
    *@exception IOException some I/O fault
    *@exception maputilsException exception from this class
    *@return   0        if the two are equal,
-   *          1        if the tuple is greater,
-   *         -1        if the tuple is smaller,                              
+   *          1        if the map is greater,
+   *         -1        if the map is smaller,                              
    */
   public static int ComparemapWithmap(AttrType fldType,
 					  map  m1, int m1_fld_no,
@@ -162,7 +162,7 @@ public class maputils
   /**
    *set up a map in specified field from a map
    *@param value the map to be set 
-   *@param map the given tuple
+   *@param map the given map
    *@param fld_no the field number
    *@param fldType the map attr type
    *@exception UnknowAttrType don't know the attribute type
