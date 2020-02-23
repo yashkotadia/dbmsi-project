@@ -9,7 +9,7 @@ import java.lang.*;
 /**
  *some useful method when processing map
  */
-public class maputils
+public class Maputils
 {
   
   /**
@@ -27,7 +27,7 @@ public class maputils
    *@param    m2_fld_no the field numbers in the map to be compared. 
    *@exception UnknowAttrType don't know the attribute type
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    *@return   0        if the two are equal,
    *          1        if the map is greater,
    *         -1        if the map is smaller,                              
@@ -37,7 +37,7 @@ public class maputils
 					  map m2, int  m2_fld_no)
     throws IOException,
 	   UnknowAttrType,
-	   maputilsException
+	   MaputilsException
     {
       int   m1_i,  m2_i;
       float m1_r,  m2_r;
@@ -50,7 +50,7 @@ public class maputils
 	    m1_i = m1.getIntFld(m1_fld_no);
 	    m2_i = m2.getIntFld(m2_fld_no);
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  if (m1_i == m2_i) return  0;
 	  if (m1_i <  m2_i) return -1;
@@ -61,7 +61,7 @@ public class maputils
 	    m1_r = m1.getFloFld(m1_fld_no);
 	    m2_r = m2.getFloFld(m2_fld_no);
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  if (m1_r == m2_r) return  0;
 	  if (m1_r <  m2_r) return -1;
@@ -72,7 +72,7 @@ public class maputils
 	    m1_s = m1.getStrFld(m1_fld_no);
 	    m2_s = m2.getStrFld(m2_fld_no);
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  
 	  // Now handle the special case that is posed by the max_values for strings...
@@ -101,14 +101,14 @@ public class maputils
    *         -1        if the tuple is smaller,  
    *@exception UnknowAttrType don't know the attribute type   
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class   
+   *@exception MaputilsException exception from this class   
    */            
   public static int ComparemapWithValue(AttrType fldType,
 					  map m1, int t1_fld_no,
 					  map  value)
     throws IOException,
 	   UnknowAttrType,
-	   maputilsException
+	   MaputilsException
     {
       return ComparemapWithmap(fldType, m1, m1_fld_no, value, m1_fld_no);
     }
@@ -123,11 +123,11 @@ public class maputils
    *          1        if the two are equal,
    *@exception UnknowAttrType don't know the attribute type
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    */            
   
   public static boolean Equal(map m1, map m2, AttrType types[], int len)
-    throws IOException,UnknowAttrType,maputilsException
+    throws IOException,UnknowAttrType,MaputilsException
     {
       int i;
       
@@ -143,17 +143,17 @@ public class maputils
    *@param fidno the field number
    *@return the content of the field number
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    */
   public static String Value(map map, int fldno)
     throws IOException,
-	   maputilsException
+	   MaputilsException
     {
       String temp;
       try{
 	temp = map.getStrFld(fldno);
       }catch (FieldNumberOutOfBoundException e){
-	throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
       }
       return temp;
     }
@@ -167,12 +167,12 @@ public class maputils
    *@param fldType the map attr type
    *@exception UnknowAttrType don't know the attribute type
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    */  
   public static void SetValue(map value, map  map, int fld_no, AttrType fldType)
     throws IOException,
 	   UnknowAttrType,
-	   maputilsException
+	   MaputilsException
     {
       
       switch (fldType.attrType)
@@ -181,21 +181,21 @@ public class maputils
 	  try {
 	    value.setIntFld(fld_no, map.getIntFld(fld_no));
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  break;
 	case AttrType.attrReal:
 	  try {
 	    value.setFloFld(fld_no, map.getFloFld(fld_no));
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new maputilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new MaputilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  break;
 	case AttrType.attrString:
 	  try {
 	    value.setStrFld(fld_no, map.getStrFld(fld_no));
 	  }catch (FieldNumberOutOfBoundException e){
-	    throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by maputils.java");
+	    throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by Maputils.java");
 	  }
 	  break;
 	default:
@@ -220,7 +220,7 @@ public class maputils
    *@param proj_list shows what input fields go where in the output map
    *@param nOutFlds number of outer relation fields
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    */
   public static short[] setup_op_map(map Jmap, AttrType[] res_attrs,
 				       AttrType in1[], int len_in1, AttrType in2[], 
@@ -228,7 +228,7 @@ public class maputils
 				       short m2_str_sizes[], 
 				       FldSpec proj_list[], int nOutFlds)
     throws IOException,
-	   maputilsException
+	   MaputilsException
     {
       short [] sizesM1 = new short [len_in1];
       short [] sizesM2 = new short [len_in2];
@@ -272,7 +272,7 @@ public class maputils
       try {
 	Jmap.setHdr((short)nOutFlds, res_attrs, res_str_sizes);
       }catch (Exception e){
-	throw new maputilsException(e,"setHdr() failed");
+	throw new MaputilsException(e,"setHdr() failed");
       }
       return res_str_sizes;
     }
@@ -288,7 +288,7 @@ public class maputils
    *@param proj_list shows what input fields go where in the output tuple
    *@param nOutFlds number of outer relation fields
    *@exception IOException some I/O fault
-   *@exception maputilsException exception from this class
+   *@exception MaputilsException exception from this class
    *@exception InvalidRelation invalid relation 
    */
 
@@ -297,7 +297,7 @@ public class maputils
 				       short m1_str_sizes[], 
 				       FldSpec proj_list[], int nOutFlds)
     throws IOException,
-	   maputilsException, 
+	   aputilsException, 
 	   InvalidRelation
     {
       short [] sizesT1 = new short [len_in1];
@@ -335,7 +335,7 @@ public class maputils
       try {
 	Jmap.setHdr((short)nOutFlds, res_attrs, res_str_sizes);
       }catch (Exception e){
-	throw new maputilsException(e,"setHdr() failed");
+	throw new MaputilsException(e,"setHdr() failed");
       } 
       return res_str_sizes;
     }
