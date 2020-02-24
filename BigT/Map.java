@@ -61,7 +61,7 @@ public class Map implements GlobalConst{
    public Map(Map fromMap)
    {
        data = fromMap.getMapByteArray();
-       map_length = fromMap.getLength();
+       map_length = fromMap.size();
        map_offset = 0;
    }
 
@@ -212,7 +212,7 @@ public class Map implements GlobalConst{
    *   @exception IOException I/O exceptions
    *   @exception InvalidMapSizeException Map size too big
    */
-   public Map setValue(String val) throws IOException{
+   public Map setValue(String val) throws IOException, InvalidMapSizeException{
     map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length();
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data);
 
