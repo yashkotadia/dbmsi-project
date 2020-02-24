@@ -166,7 +166,7 @@ public class Map implements GlobalConst{
    /** return time stamp
     *  @return int time stamp
     */
-   public String getTimeStamp(){
+   public int getTimeStamp(){
       return Convert.getIntValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE, data);
    }
 
