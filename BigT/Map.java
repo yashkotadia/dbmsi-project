@@ -115,7 +115,7 @@ public class Map implements GlobalConst{
 /** get the length of a map
   * @return     size of this map in bytes
   */
-  public short size()
+  public int size()
    {
       return map_length;
    }
@@ -216,7 +216,7 @@ public class Map implements GlobalConst{
     map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length();
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data);
 
-    if(map_length>max_size) throw InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR")
+    if(map_length>max_size) throw InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR");
     return this;
    }
 
