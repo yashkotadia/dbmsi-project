@@ -22,7 +22,7 @@ public class ExtendedSystemDefs extends SystemDefs {
 			     int bufpoolsize,
 			     String replacement_policy)
     {
-      super(dbname, dbpages, bufpoolsize, replacement_policy);	
+      super(dbname, dbpages, bufpoolsize, replacement_policy, 1);	
       init(dbpages); 
     }
   
@@ -31,7 +31,7 @@ public class ExtendedSystemDefs extends SystemDefs {
 		     int bufpoolsize ,
 		     String replacement_policy )
     {
-      super(dbname, dbpages, bufpoolsize, replacement_policy);
+      super(dbname, dbpages, bufpoolsize, replacement_policy, 1);
       init(dbpages);
     }
    

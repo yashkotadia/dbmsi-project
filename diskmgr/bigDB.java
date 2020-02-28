@@ -5,11 +5,13 @@ package diskmgr;
 import java.io.*;
 import bufmgr.*;
 import global.*;
+import btree.*;
 
-public class DB implements GlobalConst {
+public class bigDB implements GlobalConst {
 
   
   private static final int bits_per_page = MAX_SPACE * 8;
+  public int type;
   
   
   /** Open the database with the given name.
@@ -49,8 +51,13 @@ public class DB implements GlobalConst {
   }
   
   /** default constructor.
+   *  @param bigDBtype specifies the type of bigDB indexing scheme to be used
    */
-  public DB() { }
+  public bigDB(int bigDBtype){
+
+    type = bigDBtype;
+
+  }
   
   
   /** DB Constructors.

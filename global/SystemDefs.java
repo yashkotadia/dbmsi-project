@@ -6,7 +6,7 @@ import catalog.*;
 
 public class SystemDefs {
   public static BufMgr	JavabaseBM;
-  public static DB	JavabaseDB;
+  public static bigDB	JavabaseDB;
   public static Catalog	JavabaseCatalog;
   
   public static String  JavabaseDBName;
@@ -17,12 +17,12 @@ public class SystemDefs {
   public SystemDefs (){};
   
   public SystemDefs(String dbname, int num_pgs, int bufpoolsize,
-		    String replacement_policy )
+		    String replacement_policy, int type )
     {
       int logsize;
       
-      String real_logname = new String(dbname);
-      String real_dbname = new String(dbname);
+      String real_logname = new String(dbname+"_"+type); // Added _type in 
+      String real_dbname = new String(dbname+"_"+type);
       
       if (num_pgs == 0) {
 	logsize = 500;
@@ -36,13 +36,13 @@ public class SystemDefs {
       }
       
       init(real_dbname,real_logname, num_pgs, logsize,
-	   bufpoolsize, replacement_policy);
+	   bufpoolsize, replacement_policy, type);
     }
   
   
   public void init( String dbname, String logname,
 		    int num_pgs, int maxlogsize,
-		    int bufpoolsize, String replacement_policy )
+		    int bufpoolsize, String replacement_policy, int type )
     {
       
       boolean status = true;
@@ -54,7 +54,7 @@ public class SystemDefs {
       
       try {
 	JavabaseBM = new BufMgr(bufpoolsize, replacement_policy);
-	JavabaseDB = new DB();
+	JavabaseDB = new bigDB(type);
 /*
 	JavabaseCatalog = new Catalog(); 
 */
