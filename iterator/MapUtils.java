@@ -32,53 +32,122 @@ public class MapUtils
 
 
 	///row label-fld no 1 , column label -fld no 2, timestamp-fld no 3, value - fld no 4
-	public static int CompareMapWithMap(Map  m1, Map m2, int  map_fld_no)
+	public static int CompareMapWithMap(Map  m1, Map m2, int  ordertype)
 			throws IOException, MapUtilsException
 	{
 		int   m1_i,  m2_i;
 		// float m1_r,  m2_r;
 		String m1_s, m2_s;
 
-		switch (map_fld_no)
+		switch (ordertype)
 		{
 
 			case 1: // Compare two strings
+				
 				m1_s = m1.getRowLabel();
 				m2_s = m2.getRowLabel();
 
 				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
-				return 0;
-
-			case 2: // Compare two strings
+				
+				//Till here, row label has matched
+				
 				m1_s = m1.getColumnLabel();
 				m2_s = m2.getColumnLabel();
 
 				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
-				return 0;
-
-			case 3:              // Compare two integers.
+				
+				//Till here, column label has matched
+				
 				m1_i = m1.getTimeStamp();
 				m2_i = m2.getTimeStamp();
 
-				if (m1_i == m2_i) return  0;
 				if (m1_i <  m2_i) return -1;
 				if (m1_i >  m2_i) return  1;
+				
+				return 0;
+				
 
-			case 4:
-				m1_s = m1.getValue();
-				m2_s = m2.getValue();
+			case 2: // Compare two strings
+				
+				m1_s = m1.getColumnLabel();
+				m2_s = m2.getColumnLabel();
 
 				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, column label has matched
+				
+				m1_s = m1.getRowLabel();
+				m2_s = m2.getRowLabel();
+
+				// Now handle the special case that is posed by the max_values for strings...
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, row label has matched
+				
+				m1_i = m1.getTimeStamp();
+				m2_i = m2.getTimeStamp();
+
+				if (m1_i <  m2_i) return -1;
+				if (m1_i >  m2_i) return  1;
+				
+				return 0;
+
+			case 3: // Compare two strings
+				
+				m1_s = m1.getRowLabel();
+				m2_s = m2.getRowLabel();
+
+				// Now handle the special case that is posed by the max_values for strings...
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, row label has matched
+				
+				m1_i = m1.getTimeStamp();
+				m2_i = m2.getTimeStamp();
+	
+				if (m1_i <  m2_i) return -1;
+				if (m1_i >  m2_i) return  1;
+				
+				return 0;
+
+			case 4: // Compare two strings
+				
+				m1_s = m1.getColumnLabel();
+				m2_s = m2.getColumnLabel();
+
+				// Now handle the special case that is posed by the max_values for strings...
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, column label has matched
+				
+				m1_i = m1.getTimeStamp();
+				m2_i = m2.getTimeStamp();
+
+				if (m1_i <  m2_i) return -1;
+				if (m1_i >  m2_i) return  1;
+								
+				return 0;
+				
+			case 5: 
+				m1_i = m1.getTimeStamp();
+				m2_i = m2.getTimeStamp();
+
+				if (m1_i <  m2_i) return -1;
+				if (m1_i >  m2_i) return  1;
+								
 				return 0;
 
 			default:
-				throw new MapUtilsException(null, "FieldNumber < 1 or > 4 is caught by MapUtils.java");
+				throw new MapUtilsException(null, "FieldNumber < 1 or > 5 is caught by MapUtils.java");
 		}
 	}
 
