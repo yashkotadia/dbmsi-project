@@ -1,6 +1,6 @@
 /* File hferr.java  */
 
-package heap;
+package BigT;
 import chainexception.*;
 
 public class HFDiskMgrException extends ChainException{

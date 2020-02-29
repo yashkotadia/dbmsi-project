@@ -810,7 +810,7 @@ public class HFPage extends Page
     {
       short mapLen;
       short offset;
-      byte []record;
+      byte []map;
       PageId pageNo = new PageId();
       pageNo.pid= mid.pageNo.pid;
       curPage.pid = Convert.getIntValue (CUR_PAGE, data);

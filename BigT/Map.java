@@ -48,10 +48,11 @@ public class Map implements GlobalConst{
     * @param offset the offset of the map in the byte array
     */
 
-   public Map(byte [] amap, int offset)
+   public Map(byte [] amap, int offset, int length)
    {
       data = amap;
       map_offset = offset;
+      map_length = length;
    }
    
    /** Constructor(used as map copy)
@@ -106,10 +107,11 @@ public class Map implements GlobalConst{
   * @param	record	a byte array contains the map
   * @param	offset  the offset of the map ( =0 by default)
   */
- public void mapSet(byte [] record, int offset)  
+ public void mapSet(byte [] record, int offset, int length)  
   {
       System.arraycopy(record, offset, data, 0, length);
       map_offset = 0;
+      map_length = length;
   }
 
 /** get the length of a map
@@ -151,29 +153,33 @@ public class Map implements GlobalConst{
 
    /** return row label
     *  @return String row label
+    *   @exception IOException I/O exceptions
     */
-   public String getRowLabel(){
+   public String getRowLabel() throws IOException{
       return Convert.getStrValue(map_offset+4, data, ROW_LABEL_SIZE);
    }
 
    /** return column label
     *  @return String column label
+    *   @exception IOException I/O exceptions
     */
-   public String getColumnLabel(){
+   public String getColumnLabel() throws IOException{
       return Convert.getStrValue(map_offset+4+ROW_LABEL_SIZE, data, COLUMN_LABEL_SIZE);
    }
 
    /** return time stamp
     *  @return int time stamp
+    *   @exception IOException I/O exceptions
     */
-   public int getTimeStamp(){
+   public int getTimeStamp() throws IOException{
       return Convert.getIntValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE, data);
    }
 
    /** return value
     *  @return String value
+    *   @exception IOException I/O exceptions
     */
-   public String getValue(){
+   public String getValue() throws IOException{
       return Convert.getStrValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data, map_length-8-ROW_LABEL_SIZE-COLUMN_LABEL_SIZE);
    }
 
@@ -216,7 +222,7 @@ public class Map implements GlobalConst{
     map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length();
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data);
 
-    if(map_length>max_size) throw InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR");
+    if(map_length>max_size) throw new InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR");
     return this;
    }
 

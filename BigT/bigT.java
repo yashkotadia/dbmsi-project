@@ -55,7 +55,7 @@ public class bigT implements Filetype,  GlobalConst {
   /* get a new datapage from the buffer manager and initialize dpinfo
      @param dpinfop the information in the new HFPage
   */
-  private HFPage _newDatapage(DataPageInfo dpinfop)
+  private HFPage _newDatapage(DataPageInfo dpinfo)
     throws HFException,
 	   HFBufMgrException,
 	   HFDiskMgrException,
@@ -73,9 +73,9 @@ public class bigT implements Filetype,  GlobalConst {
       HFPage hfpage = new HFPage();
       hfpage.init(pageId, apage);
       
-      dpinfop.pageId.pid = pageId.pid;
-      dpinfop.mapct = 0;
-      dpinfop.availspace = hfpage.available_space();
+      dpinfo.pageId.pid = pageId.pid;
+      dpinfo.mapct = 0;
+      dpinfo.availspace = hfpage.available_space();
       dpinfo.rowct = 0;
       dpinfo.colct = 0;
 
@@ -111,6 +111,7 @@ public class bigT implements Filetype,  GlobalConst {
       pinPage(currentDirPageId, currentDirPage, false/*read disk*/);
       
       Tuple atuple = new Tuple();
+      Map amap = new Map();
       
       while (currentDirPageId.pid != INVALID_PAGE)
 	{// Start While01
@@ -796,7 +797,7 @@ public class bigT implements Filetype,  GlobalConst {
       // Assume update a map with a map whose length is equal to
       // the original map
       
-      if(newmap.getLength() != amap.getLength())
+      if(newmap.size() != amap.size())
 	{
 	  unpinPage(currentDataPageId, false /*undirty*/);
 	  unpinPage(currentDirPageId, false /*undirty*/);

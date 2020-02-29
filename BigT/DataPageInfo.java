@@ -1,4 +1,4 @@
-package heap;
+package BigT;
 
 
 /** File DataPageInfo.java */
@@ -6,6 +6,7 @@ package heap;
 
 import global.*;
 import java.io.*;
+import heap.Tuple;
 
 /** DataPageInfo class : the type of records stored on a directory page.
 *
