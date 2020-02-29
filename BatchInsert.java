@@ -1,16 +1,12 @@
-package tests;
-
-import BigT.InvalidMapSizeException;
-import BigT.Map;
-import BigT.bigT;
-import global.GlobalConst;
-import global.SystemDefs;
-import heap.Heapfile;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import global.*;
+import index.*;
+import BigT.*;
+import java.io.*;
+import java.lang.*;
+import diskmgr.*;
+import bufmgr.*;
+import btree.*; 
+import catalog.*;
 
 public class BatchInsert implements GlobalConst {
     public static void main(String[] args) {
@@ -23,7 +19,8 @@ public class BatchInsert implements GlobalConst {
         }
 
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
-        SystemDefs sysdef = new SystemDefs( bigtableName, 1000, NUMBUF, "Clock" );
+        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
+        SystemDefs sysdef = new SystemDefs( dbpath, 1000, NUMBUF, "Clock", 1 );
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));

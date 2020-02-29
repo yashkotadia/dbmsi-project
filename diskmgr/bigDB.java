@@ -1,4 +1,4 @@
-/* File DB.java */
+/* File bigDB.java */
 
 package diskmgr;
 
@@ -16,7 +16,7 @@ public class bigDB implements GlobalConst {
   
   /** Open the database with the given name.
    *
-   * @param name DB_name
+   * @param fname bigDB_name
    *
    * @exception IOException I/O errors
    * @exception FileIOException file I/O error
