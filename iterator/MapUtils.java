@@ -13,13 +13,13 @@ public class MapUtils
 {
 
 	/**
-	 * This function compares a map with another map in respective field, and
-
+	 * This function compares a map with another map on different
+	 * combinations of fields according to the order type, and
 	 *  returns:
 	 *
 	 *    0        if the two are equal,
-	 *    1        if the tuple is greater,
-	 *   -1        if the tuple is smaller,
+	 *    1        if the map is greater,
+	 *   -1        if the map is smaller,
 	 *
 	 *@param    m1        one map.
 	 *@param    m2        another map.
@@ -31,23 +31,24 @@ public class MapUtils
 	 */
 
 
-	///row label-fld no 1 , column label -fld no 2, timestamp-fld no 3, value - fld no 4
-	public static int CompareMapWithMap(Map  m1, Map m2, int  ordertype)
+	public static int CompareMapWithMap(Map  m1, Map m2, int  orderType)
 			throws IOException, MapUtilsException
 	{
 		int   m1_i,  m2_i;
-		// float m1_r,  m2_r;
+		
 		String m1_s, m2_s;
 
-		switch (ordertype)
+		switch (orderType)
 		{
 
-			case 1: // Compare two strings
+			case 1:
+				// order type: row label, column label, time stamp
+				
+				// Compare two strings
 				
 				m1_s = m1.getRowLabel();
 				m2_s = m2.getRowLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -56,7 +57,6 @@ public class MapUtils
 				m1_s = m1.getColumnLabel();
 				m2_s = m2.getColumnLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -71,12 +71,14 @@ public class MapUtils
 				return 0;
 				
 
-			case 2: // Compare two strings
+			case 2: 
+				// order type: column label, row label, time stamp
+				
+				// Compare two strings
 				
 				m1_s = m1.getColumnLabel();
 				m2_s = m2.getColumnLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -85,7 +87,6 @@ public class MapUtils
 				m1_s = m1.getRowLabel();
 				m2_s = m2.getRowLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -99,12 +100,14 @@ public class MapUtils
 				
 				return 0;
 
-			case 3: // Compare two strings
+			case 3:
+				// order type: row label, time stamp
+				
+				// Compare two strings
 				
 				m1_s = m1.getRowLabel();
 				m2_s = m2.getRowLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -118,12 +121,14 @@ public class MapUtils
 				
 				return 0;
 
-			case 4: // Compare two strings
+			case 4:
+				// order type: column label, time stamp
+				
+				// Compare two strings
 				
 				m1_s = m1.getColumnLabel();
 				m2_s = m2.getColumnLabel();
 
-				// Now handle the special case that is posed by the max_values for strings...
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
@@ -138,6 +143,8 @@ public class MapUtils
 				return 0;
 				
 			case 5: 
+				// order type: time stamp
+				
 				m1_i = m1.getTimeStamp();
 				m2_i = m2.getTimeStamp();
 
@@ -147,7 +154,7 @@ public class MapUtils
 				return 0;
 
 			default:
-				throw new MapUtilsException(null, "FieldNumber < 1 or > 5 is caught by MapUtils.java");
+				throw new MapUtilsException(null, "orderType < 1 or > 5 is caught by MapUtils.java");
 		}
 	}
 
