@@ -20,7 +20,7 @@ public class BatchInsert implements GlobalConst {
 
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
         String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
-        SystemDefs sysdef = new SystemDefs( dbpath, 1000, NUMBUF, "Clock", 1 );
+        SystemDefs sysdef = new SystemDefs( dbpath, 10000, NUMBUF, "Clock", 1 );
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
@@ -36,14 +36,18 @@ public class BatchInsert implements GlobalConst {
                 e.printStackTrace();
             }
 
-            Map m = new Map();
             while (line != null) {
 
+                Map m = new Map();
                 String[ ] attributes = line.split(",");
+                m.setValue(attributes[3]);
+                m = new Map(m.size());
                 m.setRowLabel(attributes[0]);
                 m.setColumnLabel(attributes[1]);
                 m.setTimeStamp(Integer.parseInt(attributes[2]));
                 m.setValue(attributes[3]);
+
+                System.out.println("Inserted map value: " + attributes[3]);
 
                 try {
                     bigTable.insertMap(m.returnMapByteArray());

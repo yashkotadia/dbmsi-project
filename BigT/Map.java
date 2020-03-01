@@ -219,7 +219,8 @@ public class Map implements GlobalConst{
    *   @exception InvalidMapSizeException Map size too big
    */
    public Map setValue(String val) throws IOException, InvalidMapSizeException{
-    map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length();
+    map_length = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+val.length()+2;
+    Convert.setIntValue(map_length, map_offset, data);
     Convert.setStrValue(val, map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data);
 
     if(map_length>max_size) throw new InvalidMapSizeException(null, "MAP: MAP_TOO_BIG_ERROR");
