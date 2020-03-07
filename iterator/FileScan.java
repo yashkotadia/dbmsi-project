@@ -16,6 +16,7 @@ import java.io.*;
  */
 public class FileScan extends  Iterator
 {
+  /*
   private AttrType[] _in1;
   private short in1_len;
   private short[] s_sizes; 
@@ -27,6 +28,12 @@ public class FileScan extends  Iterator
   private int nOutFlds;
   private CondExpr[]  OutputFilter;
   public FldSpec[] perm_mat;
+  */
+  private bigT bgt;
+  private Scan scan;
+  public String rowFilter;
+  public String columnFilter;
+  public String valueFilter;
 
  
 
@@ -45,18 +52,15 @@ public class FileScan extends  Iterator
    *@exception InvalidRelation invalid relation 
    */
   public  FileScan (String  file_name,
-		    AttrType in1[],                
-		    short s1_sizes[], 
-		    short     len_in1,              
-		    int n_out_flds,
-		    FldSpec[] proj_list,
-		    CondExpr[]  outFilter        		    
+        String rFilter, 
+        String cFilter,
+        String vFilter       		    
 		    )
     throws IOException,
 	   FileScanException,
-	   TupleUtilsException, 
-	   InvalidRelation
+	   MapUtilsException, 
     {
+      /*
       _in1 = in1; 
       in1_len = len_in1;
       s_sizes = s1_sizes;
@@ -68,18 +72,24 @@ public class FileScan extends  Iterator
       
       OutputFilter = outFilter;
       perm_mat = proj_list;
-      nOutFlds = n_out_flds; 
-      tuple1 =  new Tuple();
+      nOutFlds = n_out_flds;
+      */
+      rowFilter = rFilter;
+      columnFilter = cFilter;
+      valueFilter = vFilter;
+      map1 =  new Map();
 
+      /*
       try {
 	tuple1.setHdr(in1_len, _in1, s1_sizes);
       }catch (Exception e){
 	throw new FileScanException(e, "setHdr() failed");
       }
-      t1_size = tuple1.size();
+      */
+      m1_size = map1.size();
       
       try {
-	f = new Heapfile(file_name);
+	bgt = new bigT(file_name);
 	
       }
       catch(Exception e) {
@@ -87,7 +97,7 @@ public class FileScan extends  Iterator
       }
       
       try {
-	scan = f.openScan();
+	scan = bgt.openScan();
       }
       catch(Exception e){
 	throw new FileScanException(e, "openScan() failed");
@@ -97,10 +107,12 @@ public class FileScan extends  Iterator
   /**
    *@return shows what input fields go where in the output tuple
    */
+  /*
   public FldSpec[] show()
     {
       return perm_mat;
     }
+    */
   
   /**
    *@return the result tuple
@@ -114,7 +126,7 @@ public class FileScan extends  Iterator
    *@exception FieldNumberOutOfBoundException array out of bounds
    *@exception WrongPermat exception for wrong FldSpec argument
    */
-  public Tuple get_next()
+  public Map get_next()
     throws JoinsException,
 	   IOException,
 	   InvalidTupleSizeException,
@@ -125,18 +137,28 @@ public class FileScan extends  Iterator
 	   FieldNumberOutOfBoundException,
 	   WrongPermat
     {     
-      RID rid = new RID();;
+      MID mid = new MID();
       
       while(true) {
-	if((tuple1 =  scan.getNext(rid)) == null) {
+	if((map1 =  scan.getNext(mid)) == null) {
 	  return null;
 	}
 	
+  /*
 	tuple1.setHdr(in1_len, _in1, s_sizes);
 	if (PredEval.Eval(OutputFilter, tuple1, null, _in1, null) == true){
 	  Projection.Project(tuple1, _in1,  Jtuple, perm_mat, nOutFlds); 
 	  return  Jtuple;
-	}        
+	}
+  */ 
+
+    if(rowFilter == "" || rowFilter == "*" || map1.getRowLabel().equals(rowFilter)){
+      if(columnFilter == "" || columnFilter == "*"|| map1.getColumnLabel().equals(columnFilter)){
+        if(valueFilter == "" || valueFilter == "*" || map1.getValue().equals(valueFilter)){
+          return map1;
+        }
+      }
+    }       
       }
     }
 
