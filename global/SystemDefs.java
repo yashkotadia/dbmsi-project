@@ -84,7 +84,7 @@ public class SystemDefs {
       else {
 	try {
 	  JavabaseDB.openDB(dbname, num_pgs);
-	  JavabaseBM.flushAllPages();
+	  //JavabaseBM.flushAllPages(); Commented out to keep the BTreeFile header page pinned
 	}
 	catch (Exception e) {
 	  System.err.println (""+e);

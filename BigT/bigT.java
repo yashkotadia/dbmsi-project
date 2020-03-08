@@ -5,6 +5,7 @@ import diskmgr.*;
 import bufmgr.*;
 import global.*;
 import heap.Tuple;
+import btree.*;
 
 /**  This bigT implementation is directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
@@ -602,7 +603,8 @@ public class bigT implements Filetype,  GlobalConst {
       
       
       unpinPage(currentDirPageId, true /* = DIRTY */);
-      
+
+      insertMapIndex(mid, mapPtr); // Update the index      
       
       return mid;
       
@@ -1053,6 +1055,34 @@ public class bigT implements Filetype,  GlobalConst {
 
   } // end of delete_file_entry
 
+  /** Called in insertMap, used to update the BTreeFile 
+  *  @param mid Map ID of the map whose key is being inserted
+  *  @param  mapPtr Map array
+  */
+  private void insertMapIndex(MID mid, byte[] mapPtr){
+
+  	Map m = new Map(mapPtr, 0, mapPtr.length);
+
+  	try{
+	  	switch(SystemDefs.JavabaseDB.type){
+	  		default: break;
+
+	  		case 2:
+	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getRowLabel()), mid);
+	  				break;
+	  		case 3:
+	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getColumnLabel()), mid);
+	  				break;
+	  	}
+
+	}catch (Exception e) {
+		System.err.println("***** Error while inserting Map into index insertMapIndex() *******");
+      	e.printStackTrace();
+      	Runtime.getRuntime().exit(1);
+    }
+
+  }
+
 
   
-}// End of HeapFile 
+}// End of bigT 

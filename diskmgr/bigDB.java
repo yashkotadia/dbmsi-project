@@ -12,6 +12,7 @@ public class bigDB implements GlobalConst {
   
   private static final int bits_per_page = MAX_SPACE * 8;
   public int type;
+  public BTreeFile[] indices = new BTreeFile[2];
   
   
   /** Open the database with the given name.
@@ -48,6 +49,7 @@ public class bigDB implements GlobalConst {
     num_pages = firstpg.getNumDBPages();
     
     unpinPage(pageId, false /* undirty*/);
+    initIndex();
   }
   
   /** default constructor.
@@ -56,6 +58,34 @@ public class bigDB implements GlobalConst {
   public bigDB(int bigDBtype){
 
     type = bigDBtype;
+
+  }
+
+
+  /** Initialize the indices
+  */
+  private void initIndex(){
+
+    try{
+      switch(type){
+
+        case 1: break;
+
+        case 2: 
+              indices[0] = new BTreeFile("row_index", AttrType.attrString, ROW_LABEL_SIZE, 1);
+              break;
+
+        case 3:
+              indices[0] = new BTreeFile("column_index", AttrType.attrString, COLUMN_LABEL_SIZE, 1);
+              break;
+
+        default: break;
+      }
+    }catch (Exception e) {
+      System.err.println("***** error initializing the index ******");
+      e.printStackTrace();
+      Runtime.getRuntime().exit(1);
+    }
 
   }
   
@@ -111,6 +141,7 @@ public class bigDB implements GlobalConst {
     
     set_bits(pageId, 1+num_map_pages, 1);
     
+    initIndex();
   }
   
   /** Close DB file.
