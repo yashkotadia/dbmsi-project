@@ -48,10 +48,9 @@ public class BatchInsert implements GlobalConst {
                 m.setTimeStamp(Integer.parseInt(attributes[2]));
                 m.setValue(attributes[3]);
 
-                System.out.println("Inserted map value: " + attributes[3]);
-
                 try {
                     bigTable.insertMap(m.returnMapByteArray());
+                    System.out.println("Inserted map value: " + attributes[3]);
                 }catch (Exception e) {
                     System.err.println("*** error in bigT.insertMap() ***");
                     e.printStackTrace();
