@@ -1073,6 +1073,19 @@ public class bigT implements Filetype,  GlobalConst {
 	  		case 3:
 	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getColumnLabel()), mid);
 	  				break;
+	  		case 4:
+	  				SystemDefs.JavabaseDB.indices[0].insert(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].insert(new IntegerKey(m.getTimeStamp()), mid);
+	  				break;
+	  		case 5:
+	  				SystemDefs.JavabaseDB.indices[0].insert(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].insert(new IntegerKey(m.getTimeStamp()), mid);
+	  				break;
+	  	}
+
+	  	if(m.getValue().equals("1000")){
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
 	  	}
 
 	}catch (Exception e) {
