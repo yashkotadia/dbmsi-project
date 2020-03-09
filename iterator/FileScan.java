@@ -1,11 +1,11 @@
 package iterator;
    
 
-import heap.*;
+//import heap.*;
 import global.*;
 import bufmgr.*;
 import diskmgr.*;
-
+import BigT.*;
 
 import java.lang.*;
 import java.io.*;
@@ -31,9 +31,11 @@ public class FileScan extends  Iterator
   */
   private bigT bgt;
   private Scan scan;
-  public String rowFilter;
-  public String columnFilter;
-  public String valueFilter;
+  private String rowFilter;
+  private String columnFilter;
+  private String valueFilter;
+  private Map map1;
+  private int m1_size;
 
  
 
@@ -48,8 +50,7 @@ public class FileScan extends  Iterator
    *@param outFilter  select expressions
    *@exception IOException some I/O fault
    *@exception FileScanException exception from this class
-   *@exception TupleUtilsException exception from this class
-   *@exception InvalidRelation invalid relation 
+   *@exception MapUtilsException exception from this class
    */
   public  FileScan (String  file_name,
         String rFilter, 
@@ -58,7 +59,7 @@ public class FileScan extends  Iterator
 		    )
     throws IOException,
 	   FileScanException,
-	   MapUtilsException, 
+	   MapUtilsException 
     {
       /*
       _in1 = in1; 
@@ -129,7 +130,8 @@ public class FileScan extends  Iterator
   public Map get_next()
     throws JoinsException,
 	   IOException,
-	   InvalidTupleSizeException,
+	   InvalidMapSizeException,
+     InvalidTupleSizeException,
 	   InvalidTypeException,
 	   PageNotReadException, 
 	   PredEvalException,
@@ -152,20 +154,39 @@ public class FileScan extends  Iterator
 	}
   */ 
 
-    if(rowFilter == "" || rowFilter == "*" || map1.getRowLabel().equals(rowFilter)){
+   /* if(rowFilter == "" || rowFilter == "*" || map1.getRowLabel().equals(rowFilter)){
       if(columnFilter == "" || columnFilter == "*"|| map1.getColumnLabel().equals(columnFilter)){
         if(valueFilter == "" || valueFilter == "*" || map1.getValue().equals(valueFilter)){
           return map1;
         }
       }
-    }       
+    }*/  
+
+    if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter))
+          return map1;     
       }
     }
+
+
+  // For range filter, we assume that there is no space, eg. [A,Y]
+  public boolean checkFilters(String mapLabel, String filter){
+      if(filter == "" || filter == "*" || mapLabel.equals(filter))
+        return true;
+      else if(filter.charAt(0) == '['){
+        String startRange = filter.substring(1, filter.indexOf(','));
+        String endRange = filter.substring(filter.indexOf(',')+1, filter.indexOf(']'));
+        if(mapLabel.compareToIgnoreCase(startRange) >= 0 && mapLabel.compareToIgnoreCase(endRange) <= 0){
+          return true;
+        }
+      }
+      return false; 
+  }
 
   /**
    *implement the abstract method close() from super class Iterator
    *to finish cleaning up
    */
+
   public void close() 
     {
      

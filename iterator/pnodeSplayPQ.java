@@ -27,10 +27,14 @@ public class pnodeSplayPQ extends pnodePQ
   public pnodeSplayPQ() 
   {
     root = null;
+    /*
     count = 0;
     fld_no = 0;
     fld_type = new AttrType(AttrType.attrInteger);
     sort_order = new TupleOrder(TupleOrder.Ascending);
+    */
+    sort_order = new TupleOrder(TupleOrder.Ascending);
+
   }
 
   /**
@@ -39,13 +43,14 @@ public class pnodeSplayPQ extends pnodePQ
    * @param fldType the type of the field for sorting
    * @param order   the order of sorting (Ascending or Descending)
    */  
-  public pnodeSplayPQ(int fldNo, AttrType fldType, TupleOrder order)
+  public pnodeSplayPQ(/*int fldNo, AttrType fldType,*/ TupleOrder order, int ordertype)
   {
     root = null;
     count = 0;
-    fld_no   = fldNo;
-    fld_type = fldType;
+    //fld_no   = fldNo;
+    //fld_type = fldType;
     sort_order = order;
+    orderType = ordertype;
   }
 
   /**
@@ -56,7 +61,7 @@ public class pnodeSplayPQ extends pnodePQ
    *                           <code>attrNull</code> encountered
    * @exception TupleUtilsException error in tuple compare routines
    */
-  public void enq(pnode item) throws IOException, UnknowAttrType, TupleUtilsException 
+  public void enq(pnode item) throws IOException, UnknowAttrType, MapUtilsException 
   {
     count ++;
     pnodeSplayNode newnode = new pnodeSplayNode(item);
@@ -67,7 +72,7 @@ public class pnodeSplayPQ extends pnodePQ
       return;
     }
     
-    int comp = pnodeCMP(item, t.item);
+    int comp = pnodeCMP(item, t.item, orderType);
     
     pnodeSplayNode l = pnodeSplayNode.dummy;
     pnodeSplayNode r = pnodeSplayNode.dummy;
@@ -82,7 +87,7 @@ public class pnodeSplayPQ extends pnodePQ
 	  comp = 0;
 	  done = true;
 	}
-	else comp = pnodeCMP(item, tr.item);
+	else comp = pnodeCMP(item, tr.item, orderType);
 	
 	if ((sort_order.tupleOrder == TupleOrder.Ascending && comp <= 0) ||(sort_order.tupleOrder == TupleOrder.Descending && comp >= 0))  {
 	  l.rt = t; t.par = l;
@@ -96,7 +101,7 @@ public class pnodeSplayPQ extends pnodePQ
 	    comp = 0;
 	    done = true;
 	  }
-	  else comp = pnodeCMP(item, trr.item);
+	  else comp = pnodeCMP(item, trr.item, orderType);
 	  
 	  if ((t.rt = tr.lt) != null) t.rt.par = t;
 	  tr.lt = t; t.par = tr;
@@ -112,7 +117,7 @@ public class pnodeSplayPQ extends pnodePQ
 	  comp = 0;
 	  done = true;
 	}
-	else comp = pnodeCMP(item, tl.item);
+	else comp = pnodeCMP(item, tl.item, orderType);
 	
 	if ((sort_order.tupleOrder == TupleOrder.Ascending && comp >= 0) || (sort_order.tupleOrder == TupleOrder.Descending && comp <= 0)) {
 	  r.lt = t; t.par = r;
@@ -126,7 +131,7 @@ public class pnodeSplayPQ extends pnodePQ
 	    comp = 0;
 	    done = true;
 	  }
-	  else comp = pnodeCMP(item, tll.item);
+	  else comp = pnodeCMP(item, tll.item, orderType);
 	  
 	  if ((t.lt = tl.rt) != null) t.lt.par = t;
 	  tl.rt = t; t.par = tl;

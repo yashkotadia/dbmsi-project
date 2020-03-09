@@ -879,7 +879,7 @@ public class bigT implements Filetype,  GlobalConst {
    *
    */
   public Scan openScan() 
-    throws InvalidTupleSizeException,
+    throws InvalidTupleSizeException, InvalidMapSizeException,
 	   IOException
     {
       Scan newscan = new Scan(this);
@@ -896,7 +896,7 @@ public class bigT implements Filetype,  GlobalConst {
    * @exception HFDiskMgrException exception thrown from diskmgr layer
    * @exception IOException I/O errors
    */
-  public void deleteBigT()  
+  public void deletebigT()  
     throws InvalidSlotNumberException, 
 	   FileAlreadyDeletedException, 
 	   InvalidTupleSizeException, 
@@ -1082,11 +1082,12 @@ public class bigT implements Filetype,  GlobalConst {
 	  				SystemDefs.JavabaseDB.indices[1].insert(new IntegerKey(m.getTimeStamp()), mid);
 	  				break;
 	  	}
-
+	  	/*
 	  	if(m.getValue().equals("1000")){
 	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
 	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
 	  	}
+	  	*/
 
 	}catch (Exception e) {
 		System.err.println("***** Error while inserting Map into index insertMapIndex() *******");

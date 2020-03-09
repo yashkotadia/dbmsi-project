@@ -59,12 +59,26 @@ public class BatchInsert implements GlobalConst {
 
                 line = br.readLine();
             }
+            
+            Scan scan = bigTable.openScan();
+            MID mid = new MID();
+            Map map1 = new Map();
+            while(true) {
+                if((map1 =  scan.getNext(mid)) == null) 
+                    break;
+                System.out.println(map1.getValue());
+            }
+
 
         }catch (IOException e) {
             e.printStackTrace();
         }catch (InvalidMapSizeException e){
             System.err.println("*** InvalidMapSize ***");
-            e.printStackTrace();}
+            e.printStackTrace();
+        }catch (InvalidTupleSizeException e){
+            System.err.println("*** InvalidTupleSize ***");
+            e.printStackTrace();
+        }
 }
 
 }

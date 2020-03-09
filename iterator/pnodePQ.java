@@ -3,8 +3,9 @@ package iterator;
 import global.*;
 import bufmgr.*;
 import diskmgr.*;
-import heap.*;
+//import heap.*;
 import java.io.*;
+import BigT.*;
 
 /**
  * Implements a sorted binary tree.
@@ -17,10 +18,10 @@ public abstract class pnodePQ
   protected int                   count;
 
   /** the field number of the sorting field */
-  protected int                   fld_no;
-
+  //protected int                   fld_no;
+  protected  int orderType;
   /** the attribute type of the sorting field */
-  protected AttrType              fld_type;
+  //protected AttrType              fld_type;
 
   /** the sorting order (Ascending or Descending) */
   protected TupleOrder            sort_order;
@@ -52,7 +53,7 @@ public abstract class pnodePQ
    * @exception TupleUtilsException error in tuple compare routines
    */
   abstract public void  enq(pnode  item) 
-           throws IOException, UnknowAttrType, TupleUtilsException;      
+           throws IOException, UnknowAttrType, MapUtilsException;      
 
   /**
    * removes the minimum (Ascending) or maximum (Descending) element
@@ -74,9 +75,9 @@ public abstract class pnodePQ
    *                           <code>attrNull</code> encountered
    * @exception TupleUtilsException error in tuple compare routines
    */
-  public int pnodeCMP(pnode a, pnode b) 
-         throws IOException, UnknowAttrType, TupleUtilsException {
-    int ans = TupleUtils.CompareTupleWithTuple(fld_type, a.tuple, fld_no, b.tuple, fld_no);
+  public int pnodeCMP(pnode a, pnode b, int ordertype) 
+         throws IOException, UnknowAttrType, MapUtilsException {
+    int ans = MapUtils.CompareMapWithMap(/*fld_type, a.tuple, fld_no, b.tuple, fld_no*/ a.map, b.map, ordertype);
     return ans;
   }
 
@@ -91,8 +92,8 @@ public abstract class pnodePQ
    *                           <code>attrNull</code> encountered
    * @exception TupleUtilsException error in tuple compare routines
    */  
-  public boolean pnodeEQ(pnode a, pnode b) throws IOException, UnknowAttrType, TupleUtilsException {
-    return pnodeCMP(a, b) == 0;
+  public boolean pnodeEQ(pnode a, pnode b, int ordertype) throws IOException, UnknowAttrType, MapUtilsException {
+    return pnodeCMP(a, b, ordertype) == 0;
   }
   
   /**

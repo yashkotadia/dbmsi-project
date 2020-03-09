@@ -66,7 +66,7 @@ public class Scan implements GlobalConst{
      * @param hf A HeapFile object
      */
   public Scan(bigT bgt) 
-    throws InvalidTupleSizeException,
+    throws InvalidTupleSizeException, InvalidMapSizeException,
 	   IOException
   {
 	init(bgt);
@@ -83,7 +83,7 @@ public class Scan implements GlobalConst{
    * @return the Tuple of the retrieved record.
    */
   public Map getNext(MID mid) 
-    throws InvalidTupleSizeException,
+    throws InvalidMapSizeException, InvalidTupleSizeException,
 	   IOException
   {
     Map recptrmap = null;
@@ -124,7 +124,7 @@ public class Scan implements GlobalConst{
      *			false otherwise.
      */
   public boolean position(MID mid) 
-    throws InvalidTupleSizeException,
+    throws InvalidMapSizeException, InvalidTupleSizeException,
 	   IOException
   { 
     MID    nxtmid = new MID();
@@ -189,7 +189,7 @@ public class Scan implements GlobalConst{
      * @param hf A HeapFile object
      */
     private void init(bigT bgt) 
-      throws InvalidTupleSizeException,
+      throws InvalidTupleSizeException, InvalidMapSizeException,
 	     IOException
   {
 	_bgt = bgt;
@@ -246,7 +246,7 @@ public class Scan implements GlobalConst{
    *         false otherwise
    */
   private boolean firstDataPage() 
-    throws InvalidTupleSizeException,
+    throws InvalidTupleSizeException, InvalidMapSizeException,
 	   IOException
   {
     DataPageInfo dpinfo;
@@ -396,7 +396,7 @@ public class Scan implements GlobalConst{
    *			false if unsuccessful
    */
   private boolean nextDataPage() 
-    throws InvalidTupleSizeException,
+    throws InvalidMapSizeException, InvalidTupleSizeException,
 	   IOException
   {
     DataPageInfo dpinfo;
@@ -592,7 +592,7 @@ public class Scan implements GlobalConst{
    * Also returns the MID of the (new) current record.
    */
   private boolean mvNext(MID mid) 
-    throws InvalidTupleSizeException,
+    throws InvalidMapSizeException, InvalidTupleSizeException,
 	   IOException
   {
     MID nextmid;

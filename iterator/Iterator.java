@@ -1,11 +1,11 @@
 package iterator;
 import global.*;
-import heap.*;
+//import heap.*;
 import diskmgr.*;
 import bufmgr.*;
 import index.*;
 import java.io.*;
-
+import BigT.*;
 /**
  *All the relational operators and access methods are iterators.
  */
@@ -29,7 +29,7 @@ public abstract class Iterator implements Flags {
    *@exception InvalidTupleSizeException invalid tuple size
    *@exception InvalidTypeException tuple type not valid
    *@exception PageNotReadException exception from lower layer
-   *@exception TupleUtilsException exception from using tuple utilities
+   *@exception MapUtilsException exception from using tuple utilities
    *@exception PredEvalException exception from PredEval class
    *@exception SortException sort exception
    *@exception LowMemException memory error
@@ -37,7 +37,7 @@ public abstract class Iterator implements Flags {
    *@exception UnknownKeyTypeException key type unknown
    *@exception Exception other exceptions
    */
-  public abstract Tuple get_next() 
+  public abstract Map get_next() 
     throws IOException,
 	   JoinsException ,
 	   IndexException,
