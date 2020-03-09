@@ -124,6 +124,39 @@ public class Convert{
       value = instr.readUTF();
       return value;
     }
+
+  /**
+   * reads two strings that have been encoded using a modified UTF-8 format from
+   * the given byte array at the specified position
+   * @param       data            a byte array
+   * @param       position        the position in data[]
+   * @param   length    the length of the string in bytes
+   *               (=strlength +4)
+   * @exception   java.io.IOException I/O errors
+   * @return      the string[]
+   */
+  public static String[] getStrStrValue (int position, byte []data, int length)
+    throws java.io.IOException
+    {
+      InputStream in;
+      DataInputStream instr;
+      String[] value = new String[2];
+      byte tmp[] = new byte[length];  
+      
+      // copy the value from data array out to a tmp byte array
+      System.arraycopy (data, position, tmp, 0, length);
+      
+      /* creates a new data input stream to read data from the
+       * specified input stream
+       */
+      in = new ByteArrayInputStream(tmp);
+      instr = new DataInputStream(in);
+      value[0] = instr.readUTF();
+      System.out.println(value[0]);
+      value[1] = instr.readUTF();
+      System.out.println(value[1]);
+      return value;
+    }
   
   /**
    * reads 2 bytes from the given byte array at the specified position
