@@ -387,7 +387,12 @@ public class BTreeFile extends IndexFile
       else if ( key instanceof IntegerKey ) {
 	if ( headerPage.get_keyType() != AttrType.attrInteger ) {
 	  throw new KeyNotMatchException(null,"");
-	}
+	}   
+      }
+      else if ( key instanceof StringStringKey ) {
+  if ( headerPage.get_keyType() != AttrType.attrStringString ) {
+    throw new KeyNotMatchException(null,"");
+  }
       }   
       else 
 	throw new KeyNotMatchException(null,"");

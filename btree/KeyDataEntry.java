@@ -33,7 +33,11 @@ public class KeyDataEntry {
      if ( key instanceof IntegerKey ) 
         this.key= new IntegerKey(((IntegerKey)key).getKey());
      else if ( key instanceof StringKey ) 
-        this.key= new StringKey(((StringKey)key).getKey());    
+        this.key= new StringKey(((StringKey)key).getKey());   
+     else if ( key instanceof StringStringKey){
+        String a[] = ((StringStringKey)key).getKey();
+        this.key = new StringStringKey(a[0], a[1]);
+     }
   };
 
 
@@ -41,6 +45,13 @@ public class KeyDataEntry {
    */
   public KeyDataEntry( String key, PageId pageNo) {
      this.key = new StringKey(key); 
+     this.data = new IndexData(pageNo);
+  };
+
+  /** Class constructor.
+   */
+  public KeyDataEntry( String key1, String key2, PageId pageNo) {
+     this.key = new StringStringKey(key1, key2); 
      this.data = new IndexData(pageNo);
   };
 
@@ -58,7 +69,11 @@ public class KeyDataEntry {
      if ( key instanceof IntegerKey ) 
         this.key= new IntegerKey(((IntegerKey)key).getKey());
      else if ( key instanceof StringKey ) 
-        this.key= new StringKey(((StringKey)key).getKey());    
+        this.key= new StringKey(((StringKey)key).getKey());
+     else if ( key instanceof StringStringKey){
+        String[] a = ((StringStringKey)key).getKey();
+        this.key = new StringStringKey(a[0], a[1]);
+     }    
   };
 
 
@@ -66,6 +81,13 @@ public class KeyDataEntry {
    */
   public KeyDataEntry( String key, RID rid) {
      this.key = new StringKey(key); 
+     this.data = new LeafData(rid);
+  };
+
+  /** Class constructor.
+   */
+  public KeyDataEntry( String key1, String key2, RID rid) {
+     this.key = new StringStringKey(key1, key2); 
      this.data = new LeafData(rid);
   }; 
 
@@ -75,12 +97,17 @@ public class KeyDataEntry {
      if ( key instanceof IntegerKey ) 
         this.key= new IntegerKey(((IntegerKey)key).getKey());
      else if ( key instanceof StringKey ) 
-        this.key= new StringKey(((StringKey)key).getKey()); 
+        this.key= new StringKey(((StringKey)key).getKey());
+     else if ( key instanceof StringStringKey){
+        String[] a = ((StringStringKey)key).getKey();
+        this.key = new StringStringKey(a[0], a[1]);
+     } 
 
      if ( data instanceof IndexData ) 
         this.data= new IndexData(((IndexData)data).getData());
      else if ( data instanceof LeafData ) 
         this.data= new LeafData(((LeafData)data).getData()); 
+
   }
 
   /** shallow equal. 
@@ -93,9 +120,14 @@ public class KeyDataEntry {
       if ( key instanceof IntegerKey )
          st1= ((IntegerKey)key).getKey().equals
                   (((IntegerKey)entry.key).getKey());
-      else 
+      else if (key instanceof StringKey)
          st1= ((StringKey)key).getKey().equals
                   (((StringKey)entry.key).getKey());
+      else{
+        String[] a = ((StringStringKey)key).getKey();
+        String[] b = ((StringStringKey)entry.key).getKey();
+        st1 = a[0].equals(b[0]) && a[1].equals(b[1]);
+      }
 
       if( data instanceof IndexData )
          st2= ( (IndexData)data).getData().pid==
