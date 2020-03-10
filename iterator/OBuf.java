@@ -62,7 +62,7 @@ public class OBuf implements GlobalConst{
       
       byte[] copybuf;
       copybuf = buf.getMapByteArray();
-      System.arraycopy(copybuf,0,_bufs[curr_page],m_wr_to_pg*m_size,m_size); 
+      System.arraycopy(copybuf,0,_bufs[curr_page],m_wr_to_pg*m_size,buf.size()); 
       Map map_ptr = new Map(_bufs[curr_page] , m_wr_to_pg * m_size,m_size);
       
       m_written++; m_wr_to_pg++; m_wr_to_buf++; dirty = true;

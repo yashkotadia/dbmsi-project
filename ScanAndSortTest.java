@@ -9,7 +9,7 @@ import btree.*;
 import catalog.*;
 import iterator.*;
 
-public class BatchInsert implements GlobalConst {
+public class ScanAndSortTest implements GlobalConst {
     private static int   SORTPGNUM = 12; 
     public static void main(String[] args) {
 
@@ -62,12 +62,63 @@ public class BatchInsert implements GlobalConst {
                 line = br.readLine();
             }
             
-            
+            //Scan Test
+
+            Scan scan = bigTable.openScan();
+            MID mid = new MID();
+            Map map1 = new Map();
+            while(true) {
+                if((map1 =  scan.getNext(mid)) == null) 
+                    break;
+                System.out.println(map1.getValue());
+            }
+
+            // FileScanTest 
+
+            FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"[S,Z]", "*", "*");
+            /*
+            while(true) {
+                if((map1 =  fscan.get_next()) == null){
+                    System.out.println("Breaking out");
+                    break;
+                } 
+                    
+                System.out.println(map1.getValue());
+            }*/
+
+            // Sort Test
+
+            TupleOrder[] order = new TupleOrder[2];
+            order[0] = new TupleOrder(TupleOrder.Ascending);
+            order[1] = new TupleOrder(TupleOrder.Descending);
+            Sort sort = new Sort(order[0], fscan, SORTPGNUM, 1, 100);
+            while(true){
+                if((map1 = sort.get_next()) == null){
+                    break;
+                }
+                System.out.println(map1.getValue());
+            }
+
 
         }catch (IOException e) {
             e.printStackTrace();
         }catch (InvalidMapSizeException e){
             System.err.println("*** InvalidMapSize ***");
+            e.printStackTrace();
+        }catch (InvalidTupleSizeException e){
+            System.err.println("*** InvalidTupleSize ***");
+            e.printStackTrace();
+        }catch (FileScanException e){
+            System.err.println("*** Invalid file scan ***");
+            e.printStackTrace();
+        }catch (MapUtilsException e){
+            System.err.println("*** MapUtils error ***");
+            e.printStackTrace();
+        }catch (PageNotReadException e){
+            System.err.println("*** Page not read error ***");
+            e.printStackTrace();
+        }catch (WrongPermat e){
+            System.err.println("*** Wrong permat error ***");
             e.printStackTrace();
         }catch(Exception e){
             System.err.println("*** error ***");
