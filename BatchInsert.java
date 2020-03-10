@@ -7,6 +7,7 @@ import diskmgr.*;
 import bufmgr.*;
 import btree.*; 
 import catalog.*;
+import iterator.*;
 
 public class BatchInsert implements GlobalConst {
     public static void main(String[] args) {
@@ -60,12 +61,21 @@ public class BatchInsert implements GlobalConst {
                 line = br.readLine();
             }
             
-            Scan scan = bigTable.openScan();
-            MID mid = new MID();
+            //Scan scan = bigTable.openScan();
+            //MID mid = new MID();
             Map map1 = new Map();
-            while(true) {
+            /*while(true) {
                 if((map1 =  scan.getNext(mid)) == null) 
                     break;
+                System.out.println(map1.getValue());
+            }*/
+            FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"[S,Z]", "*", "*");
+            while(true) {
+                if((map1 =  fscan.get_next()) == null){
+                    System.out.println("Breaking out");
+                    break;
+                } 
+                    
                 System.out.println(map1.getValue());
             }
 
@@ -78,7 +88,20 @@ public class BatchInsert implements GlobalConst {
         }catch (InvalidTupleSizeException e){
             System.err.println("*** InvalidTupleSize ***");
             e.printStackTrace();
+        }catch (FileScanException e){
+            System.err.println("*** Invalid file scan ***");
+            e.printStackTrace();
+        }catch (MapUtilsException e){
+            System.err.println("*** MapUtils error ***");
+            e.printStackTrace();
+        }catch (PageNotReadException e){
+            System.err.println("*** Page not read error ***");
+            e.printStackTrace();
+        }catch (WrongPermat e){
+            System.err.println("*** Wrong permat error ***");
+            e.printStackTrace();
         }
+
 }
 
 }

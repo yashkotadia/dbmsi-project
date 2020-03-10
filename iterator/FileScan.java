@@ -128,15 +128,11 @@ public class FileScan extends  Iterator
    *@exception WrongPermat exception for wrong FldSpec argument
    */
   public Map get_next()
-    throws JoinsException,
+    throws 
 	   IOException,
 	   InvalidMapSizeException,
      InvalidTupleSizeException,
-	   InvalidTypeException,
 	   PageNotReadException, 
-	   PredEvalException,
-	   UnknowAttrType,
-	   FieldNumberOutOfBoundException,
 	   WrongPermat
     {     
       MID mid = new MID();
@@ -161,18 +157,27 @@ public class FileScan extends  Iterator
         }
       }
     }*/  
-
-    if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter))
-          return map1;     
-      }
+    //System.out.println("Here");
+    //System.out.print(map1.getRowLabel() + " ");
+    //System.out.print(map1.getColumnLabel()+ " ");
+    //System.out.print(map1.getValue());
+    
+    //System.out.print(map1.getRowLabel().length()+ " " + rowFilter);
+    //System.out.println();
+    if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter)){
+          //System.out.println("Here");
+          return map1;
+      }     
     }
+  }
 
 
   // For range filter, we assume that there is no space, eg. [A,Y]
   public boolean checkFilters(String mapLabel, String filter){
-      if(filter == "" || filter == "*" || mapLabel.equals(filter))
+      if(filter == "" || filter == "*" || (mapLabel.compareTo(filter)==0) )
         return true;
       else if(filter.charAt(0) == '['){
+        //System.out.println(filter);
         String startRange = filter.substring(1, filter.indexOf(','));
         String endRange = filter.substring(filter.indexOf(',')+1, filter.indexOf(']'));
         if(mapLabel.compareToIgnoreCase(startRange) >= 0 && mapLabel.compareToIgnoreCase(endRange) <= 0){
