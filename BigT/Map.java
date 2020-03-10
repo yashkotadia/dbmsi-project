@@ -1,3 +1,4 @@
+
 /* File Map.java */
 
 package BigT;
@@ -6,7 +7,16 @@ import java.io.*;
 import java.lang.*;
 import global.*;
 
-
+/** 
+ * This class defines a Map in our BigTable.
+ * It provides various contructors to create a Map.
+ * It provides functions to get and set row, column, timestamp, value and size
+ * It also encapsulates the logic for calculating the size of the map since the size of a map is variable
+ * It encodes an entire map in a byte array.
+ * The format of the data byte array is as follows:
+ *             map_length           row_label                     column_label            timestamp      value
+ *                4bytes      fixed in global constants     fixed in global constants        4bytes     variable
+ *   */ 
 public class Map implements GlobalConst{
 
 
