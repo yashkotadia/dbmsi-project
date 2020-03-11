@@ -1,7 +1,7 @@
 package btree;
 
 /**  StringKey: It extends the KeyClass.
- *   It defines the string Key.
+ *   It defines the composite (String,String) Key.
  */ 
 public class StringStringKey extends KeyClass {
 
@@ -13,15 +13,16 @@ public class StringStringKey extends KeyClass {
   }
 
   /** Class constructor
-   *  @param     s   the value of the string key to be set 
+   *  @param     s1   the value of the first string key to be set
+   *  @param     s2   the value of the second string key to be set
    */
   public StringStringKey(String s1, String s2) { 
     key1 = new String(s1);
     key2 = new String(s2);
   }
 
-  /** get a copy of the istring key
-  *  @return the reference of the copy 
+  /** get a copy of the string,string key
+  *  @return the reference of the array copy 
   */ 
   public String[] getKey() {
     String[] ret = new String[2];
@@ -30,7 +31,9 @@ public class StringStringKey extends KeyClass {
     return ret;
   }
 
-  /** set the string key value
+  /** set the string,string key value
+   *  @param     s1   the value of the first string key to be set
+   *  @param     s2   the value of the second string key to be set
    */ 
   public void setKey(String s1, String s2) { 
     key1=new String(s1);

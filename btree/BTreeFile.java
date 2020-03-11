@@ -1,9 +1,3 @@
-/*
- * @(#) bt.java   98/03/24
- * Copyright (c) 1998 UW.  All Rights Reserved.
- *         Author: Xiaohu Li (xioahu@cs.wisc.edu).
- *
- */
 
 package btree;
 
@@ -13,7 +7,7 @@ import bufmgr.*;
 import global.*;
 import heap.*;
 
-/** btfile.java
+/** BtreeFile.java
  * This is the main definition of class BTreeFile, which derives from 
  * abstract base class IndexFile.
  * It provides an insert/delete interface.
