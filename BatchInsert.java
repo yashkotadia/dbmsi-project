@@ -10,7 +10,7 @@ import catalog.*;
 import iterator.*;
 
 public class BatchInsert implements GlobalConst {
-    private static int   SORTPGNUM = 12; 
+
     public static void main(String[] args) {
 
         //Parsing arguments:
