@@ -21,5 +21,13 @@ public class MID extends RID{
     {
       super(pageno, slotno);
     }
+
+  /**
+   *  constructor of class
+   */
+  public MID (RID rid)
+    {
+      super(rid.pageNo, rid.slotNo);
+    }
   
 }
