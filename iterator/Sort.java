@@ -17,7 +17,7 @@ import BigT.*;
  */
 public class Sort extends Iterator implements GlobalConst
 {
-  private static final int ARBIT_RUNS = 10;
+  private static final int ARBIT_RUNS = 100;
   
   /*private AttrType[]  _in;         
   private short       n_cols;
@@ -68,7 +68,7 @@ public class Sort extends Iterator implements GlobalConst
    * @exception SortException something went wrong in the lower layer. 
    * @exception Exception other exceptions
    */
-  private void setup_for_merge(int tuple_size, int n_R_runs)
+  private void setup_for_merge(int map_size, int n_R_runs)
     throws IOException, 
 	   LowMemException, 
 	   SortException,

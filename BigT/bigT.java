@@ -7,26 +7,33 @@ import global.*;
 import heap.Tuple;
 import btree.*;
 
-/**  This bigT implementation is directory-based. We maintain a
+/** This bigT implementation is heapfile directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
- *  when loaded into memory).  The directory itself is also composed
+ *  when loaded into memory). The directory itself is also composed
  *  of HFPages, with each record being of type DataPageInfo
  *  as defined below.
+ *
+ *  We have assumed that the directory pages contain tuples of records 
+ *	as in the minibase implementation. However, the data pages now contain maps 
+ *	instead of tuples. This is done because the directory records will always
+ *	be of fixed size and doing so increases predictability. Thus a tuple 
+ *  implementation would be more justifiable,   
+ *
  *
  *  The first directory page is a header page for the entire database
  *  (it is the one to which our filename is mapped by the DB).
  *  All directory pages are in a doubly-linked list of pages, each
  *  directory entry points to a single data page, which contains
- *  the actual records.
+ *  the actual maps.
  *
  *  The bigT data pages are implemented as slotted pages, with
- *  the slots at the front and the records in the back, both growing
+ *  the slots at the front and the maps in the back, both growing
  *  into the free space in the middle of the page.
  *
- *  We can store roughly pagesize/sizeof(DataPageInfo) records per
- *  directory page; for any given HeapFile insertion, it is likely
+ *  We can store roughly pagesize/sizeof(DataPageInfo) maps per
+ *  directory page; for any given bigT insertion, it is likely
  *  that at least one of those referenced data pages will have
- *  enough free space to satisfy the request.
+ *  enough free space to satisfy the request. 
  */
 
 
@@ -84,7 +91,7 @@ public class bigT implements Filetype,  GlobalConst {
       
     } // end of _newDatapage
   
-  /* Internal HeapFile function (used in getMap and updateMap):
+  /* Internal bigT function (used in getMap and updateMap):
      returns pinned directory page and pinned data page of the specified 
      user map(mid) and true if map is found.
      If the user map cannot be found, return false.
@@ -118,7 +125,7 @@ public class bigT implements Filetype,  GlobalConst {
 	{// Start While01
 	  // ASSERTIONS:
 	  //  currentDirPage, currentDirPageId valid and pinned and Locked.
-	  
+	  // currDataPageRid points to a record in the directory page. (And so RID used)
 	  for( currentDataPageRid = currentDirPage.firstRecord();
 	       currentDataPageRid != null;
 	       currentDataPageRid = currentDirPage.nextRecord(currentDataPageRid))
@@ -169,7 +176,7 @@ public class bigT implements Filetype,  GlobalConst {
 		}
 	      else
 		{
-		  // user record not found on this datapage; unpin it
+		  // user record not be found on this datapage; unpin it
 		  // and try the next one
 		  unpinPage(dpinfo.pageId, false /*undirty*/);
 		  
@@ -209,7 +216,7 @@ public class bigT implements Filetype,  GlobalConst {
       
     } // end of _findDatapage		     
   
-  /** Initialize.  A null name produces a temporary heapfile which will be
+  /** Initialize.  A null name produces a temporary bigT heapfile which will be
    * deleted by the destructor.  If the name already denotes a file, the
    * file is opened; otherwise, a new empty file is created.
    *
@@ -288,7 +295,7 @@ public class bigT implements Filetype,  GlobalConst {
 	}
       _file_deleted = false;
       // ASSERTIONS:
-      // - ALL private data members of class Heapfile are valid:
+      // - ALL private data members of class bigT are valid:
       //
       //  - _firstDirPageId valid
       //  - _fileName valid
@@ -323,7 +330,7 @@ public class bigT implements Filetype,  GlobalConst {
       while(currentDirPageId.pid != INVALID_PAGE)
 	{
 	   pinPage(currentDirPageId, currentDirPage, false);
-	   
+	   // Directory pages contain tuples
 	   RID rid = new RID();
 	   Tuple atuple;
 	   for (rid = currentDirPage.firstRecord();
@@ -356,8 +363,8 @@ public class bigT implements Filetype,  GlobalConst {
   
   /** Insert map into file, return its Mid.
    *
-   * @param mapPtr pointer of the record
-   * @param mapLen the length of the record
+   * @param mapPtr pointer of the map
+   * @param mapLen the length of the map
    *
    * @exception InvalidSlotNumberException invalid slot number
    * @exception InvalidTupleSizeException invalid tuple size
@@ -381,7 +388,7 @@ public class bigT implements Filetype,  GlobalConst {
       int dpinfoLen = 0;	
       int mapLen = mapPtr.length;
       boolean found;
-      RID currentDataPageRid = new RID();
+      RID currentDataPageRid = new RID(); // Points to a record in directory page
       Page pageinbuffer = new Page();
       HFPage currentDirPage = new HFPage();
       HFPage currentDataPage = new HFPage();
@@ -475,7 +482,7 @@ public class bigT implements Filetype,  GlobalConst {
 		  
 		  // end the loop, because a new datapage with its record
 		  // in the current directorypage was created and inserted into
-		  // the heapfile; the new datapage has enough space for the
+		  // the bigT; the new datapage has enough space for the
 		  // map which the user wants to insert
 		  
 		  found = true;
@@ -582,8 +589,8 @@ public class bigT implements Filetype,  GlobalConst {
       mid = currentDataPage.insertMap(mapPtr);
       
       dpinfo.mapct++;
-      dpinfo.rowct++;
-      dpinfo.colct++;
+      //dpinfo.rowct++;
+      //dpinfo.colct++;
       dpinfo.availspace = currentDataPage.available_space();
       
       
@@ -603,8 +610,8 @@ public class bigT implements Filetype,  GlobalConst {
       
       
       unpinPage(currentDirPageId, true /* = DIRTY */);
-
-      insertMapIndex(mid, mapPtr); // Update the index      
+      if(_ftype == ORDINARY)
+      	insertMapIndex(mid, mapPtr); // Update the index      
       
       return mid;
       
@@ -658,8 +665,8 @@ public class bigT implements Filetype,  GlobalConst {
       currentDataPage.deleteMap(mid);
       
       pdpinfo.mapct--;
-      pdpinfo.rowct--;
-      pdpinfo.colct--;
+      //pdpinfo.rowct--;
+      //pdpinfo.colct--;
       pdpinfo.flushToTuple();	//Write to the buffer pool
       if (pdpinfo.mapct >= 1) 
 	{
@@ -758,7 +765,7 @@ public class bigT implements Filetype,  GlobalConst {
     }
   
   
-  /** Updates the specified map in the heapfile.
+  /** Updates the specified map in the bigT.
    * @param mid: the map which needs update
    * @param newmap: the new content of the map
    *
@@ -808,7 +815,7 @@ public class bigT implements Filetype,  GlobalConst {
 	  
 	}
 
-      // new copy of this record fits in old space;
+      // new copy of this map fits in old space;
       amap.mapCopy(newmap);
       unpinPage(currentDataPageId, true /* = DIRTY */);
       
@@ -819,7 +826,7 @@ public class bigT implements Filetype,  GlobalConst {
     }
   
   
-  /** Read record from file, returning pointer and length.
+  /** Read map from file, returning pointer and length.
    * @param mid Map ID
    *
    * @exception InvalidSlotNumberException invalid slot number
