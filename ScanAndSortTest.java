@@ -10,7 +10,7 @@ import catalog.*;
 import iterator.*;
 
 public class ScanAndSortTest implements GlobalConst {
-    private static int   SORTPGNUM = 12; 
+    private static int   SORTPGNUM = 10; 
     public static void main(String[] args) {
 
         //Parsing arguments:
@@ -87,11 +87,23 @@ public class ScanAndSortTest implements GlobalConst {
             }*/
 
             // Sort Test
+            // set up an identity selection
+            CondExpr[] expr = new CondExpr[2];
+            expr[0] = new CondExpr();
+            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+            expr[0].type2 = new AttrType(AttrType.attrString);
+            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+            expr[0].operand2.string = "Singapore";
+            expr[0].next = null;
+            expr[1] = null;
+            IndexScan iscan = new IndexScan ( new IndexType(IndexType.B_Index), bigtableName+"_"+databaseType,
+               "row_index", "*", "*", "*", null);
 
             TupleOrder[] order = new TupleOrder[2];
             order[0] = new TupleOrder(TupleOrder.Ascending);
             order[1] = new TupleOrder(TupleOrder.Descending);
-            Sort sort = new Sort(order[0], fscan, SORTPGNUM, 1, 100);
+            Sort sort = new Sort(order[0], iscan, SORTPGNUM, 1, 80);
             while(true){
                 if((map1 = sort.get_next()) == null){
                     break;
