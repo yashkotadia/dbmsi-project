@@ -22,8 +22,8 @@ public class BatchInsert implements GlobalConst {
 
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
         int numbuffs = Integer.parseInt(args[3]);
-        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
-        SystemDefs sysdef = new SystemDefs( dbpath, 10000, numbuffs, "Clock",  Integer.parseInt(databaseType));
+        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName+"_"+databaseType; 
+        SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock",  Integer.parseInt(databaseType));
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
