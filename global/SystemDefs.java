@@ -3,6 +3,7 @@ package global;
 import bufmgr.*;
 import diskmgr.*;
 import catalog.*;
+import java.io.File;
 
 public class SystemDefs {
   public static BufMgr	JavabaseBM;
@@ -21,8 +22,8 @@ public class SystemDefs {
     {
       int logsize;
       
-      String real_logname = new String(dbname+"_"+type); // Added _type in 
-      String real_dbname = new String(dbname+"_"+type);
+      String real_logname = new String(dbname); // Added _type in 
+      String real_dbname = new String(dbname);
       
       if (num_pgs == 0) {
 	logsize = 500;
@@ -70,8 +71,9 @@ public class SystemDefs {
       MINIBASE_DBNAME = new String(JavabaseDBName);
       
       // create or open the DB
+      File tempFile = new File(dbname);
       
-      if ((MINIBASE_RESTART_FLAG)||(num_pgs == 0)){//open an existing database
+      if ((MINIBASE_RESTART_FLAG)||(num_pgs == 0)||tempFile.exists()){//open an existing database
 	try {
 	  JavabaseDB.openDB(dbname);
 	}
