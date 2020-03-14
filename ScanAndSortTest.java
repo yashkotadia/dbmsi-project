@@ -10,7 +10,7 @@ import catalog.*;
 import iterator.*;
 
 public class ScanAndSortTest implements GlobalConst {
-    private static int   SORTPGNUM = 10; 
+    private static int   SORTPGNUM = 100; 
     public static void main(String[] args) {
 
         //Parsing arguments:
@@ -23,7 +23,7 @@ public class ScanAndSortTest implements GlobalConst {
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
         int numbuffs = Integer.parseInt(args[3]);
         String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
-        SystemDefs sysdef = new SystemDefs( dbpath, 10000, numbuffs, "Clock",  Integer.parseInt(databaseType));
+        SystemDefs sysdef = new SystemDefs( dbpath, 12500, numbuffs, "Clock",  Integer.parseInt(databaseType));
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
@@ -73,9 +73,12 @@ public class ScanAndSortTest implements GlobalConst {
                 System.out.println(map1.getValue());
             }
 
+            //for(int i=0; i<30; i++)
+            //    SystemDefs.JavabaseDB.add_file_entry("check"+i, new PageId(0));
+
             // FileScanTest 
 
-            FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"[S,Z]", "*", "*");
+            FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"*", "*", "*");
             /*
             while(true) {
                 if((map1 =  fscan.get_next()) == null){
@@ -103,7 +106,7 @@ public class ScanAndSortTest implements GlobalConst {
             TupleOrder[] order = new TupleOrder[2];
             order[0] = new TupleOrder(TupleOrder.Ascending);
             order[1] = new TupleOrder(TupleOrder.Descending);
-            Sort sort = new Sort(order[0], iscan, SORTPGNUM, 1, 80);
+            Sort sort = new Sort(order[0], fscan, SORTPGNUM, 1, 80);
             while(true){
                 if((map1 = sort.get_next()) == null){
                     break;

@@ -6,6 +6,7 @@ import java.io.*;
 import bufmgr.*;
 import global.*;
 import btree.*;
+import java.util.Arrays;
 
 public class bigDB implements GlobalConst {
 
@@ -517,6 +518,7 @@ public class bigDB implements GlobalConst {
     // going to put the new file entry.
     
     dp.setFileEntry(start_page_num, fname, free_slot);
+    //System.out.println(Arrays.toString(dp.data));
     
     unpinPage(hpid, true /* dirty*/);
     
@@ -1025,6 +1027,8 @@ class DBHeaderPage implements PageUsedBytes, GlobalConst {
 
     int position = START_FILE_ENTRIES + entryNo * SIZE_OF_FILE_ENTRY;
     pageNo.pid = Convert.getIntValue (position, data);
+    if(pageNo.pid==INVALID_PAGE) return "";
+    //System.out.println(pageNo.pid + "\t" +Convert.getStrValue (position+4, data, MAX_NAME + 2) + "\t" +entryNo);
     return (Convert.getStrValue (position+4, data, MAX_NAME + 2));
   }
   
