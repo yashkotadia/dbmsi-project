@@ -62,9 +62,15 @@ public class BT  implements GlobalConst{
 
         String[] a = ((StringStringKey)key1).getKey();
         String[] b = ((StringStringKey)key2).getKey();
-
-        if(a[0].compareTo(b[0])!=0) return a[0].compareTo(b[0]);
-        else return a[1].compareTo(b[1]);
+         
+        if(a[0].compareTo(b[0])!=0)
+            return a[0].compareTo(b[0]);
+        else {
+            if (b[1].equals(""))
+                return a[0].compareTo(b[0]);
+            else
+                return a[1].compareTo(b[1]);
+        }
 
       }
       
@@ -191,7 +197,7 @@ public class BT  implements GlobalConst{
           key= new StringKey( Convert.getStrValue(offset, from, length-n));
 	}
   else if (keyType== AttrType.attrStringString) {
-    System.out.println(" offset  "+ offset + "  " + length + "  "+n);
+    //System.out.println(" offset  "+ offset + "  " + length + "  "+n);
           String[] a = Convert.getStrStrValue(offset, from, length-n);
           key= new StringStringKey(a[0], a[1]);
   } 
