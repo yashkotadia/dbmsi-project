@@ -160,6 +160,8 @@ public class bigDB implements GlobalConst {
    * @exception IOException I/O errors.
    */
   public void closeDB() throws IOException {
+    pcounter.printReads();
+    pcounter.printWrites();
     fp.close();
   }
 
@@ -227,6 +229,7 @@ public class bigDB implements GlobalConst {
     byte [] buffer = apage.getpage();  //new byte[MINIBASE_PAGESIZE];
     try{
       fp.read(buffer);
+      pcounter.readIncrement();
     }
     catch (IOException e) {
       throw new FileIOException(e, "DB file I/O error");
@@ -257,6 +260,7 @@ public class bigDB implements GlobalConst {
     // Write the appropriate number of bytes.
     try{
       fp.write(apage.getpage());
+      pcounter.writeIncrement();
     }
     catch (IOException e) {
       throw new FileIOException(e, "DB file I/O error");
