@@ -116,7 +116,7 @@ public class ScanAndSortTest implements GlobalConst {
                 System.out.println(map1.getValue());
             }
             sort.close();
-
+            sysdef.close();
 
         }catch (IOException e) {
             e.printStackTrace();
