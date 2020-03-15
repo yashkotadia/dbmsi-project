@@ -61,8 +61,8 @@ public class BatchInsert implements GlobalConst {
 
                 line = br.readLine();
             }
-            
-            
+
+            sysdef.close();
 
         }catch (IOException e) {
             e.printStackTrace();
