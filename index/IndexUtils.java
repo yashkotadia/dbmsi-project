@@ -138,6 +138,26 @@ public class IndexUtils {
 	    indScan = ((BTreeFile)indFile).new_scan(key2, key1);
 	  }
 	  return indScan;
+
+	case AttrType.attrStringString:
+		int compar = 0;
+		String[] a = ((StringStringKey)key1).getKey();
+		String[] b = ((StringStringKey)key2).getKey();
+		if(a[0].compareTo(b[0])!=0)
+			compar = a[0].compareTo(b[0]);
+		else {
+			if (b[1].equals(""))
+				compar = a[0].compareTo(b[0]);
+			else
+				compar = a[1].compareTo(b[1]);
+		}
+		if (compar < 0) {
+			indScan = ((BTreeFile)indFile).new_scan(key1, key2);
+		}
+		else {
+			indScan = ((BTreeFile)indFile).new_scan(key2, key1);
+		}
+		return indScan;
 	  
 	case AttrType.attrReal:
 	  /*
@@ -151,7 +171,7 @@ public class IndexUtils {
 	  */
 	default:
 	  // error condition
-	  throw new UnknownKeyTypeException("IndexUtils.java: Only Integer and String keys are supported so far");	
+	  throw new UnknownKeyTypeException("IndexUtils.java: Only Integer, String and (String, String) composite keys are supported so far");	
 	}
       } // end of else 
       
@@ -162,7 +182,7 @@ public class IndexUtils {
    * @param cd the selection condition
    * @param type attribute type of the selection field
    * @param choice first (1) or second (2) operand is the value
-   * @return an instance of the KeyClass (IntegerKey or StringKey)
+   * @return an instance of the KeyClass (IntegerKey or StringKey or StringStringKey)
    * @exception UnknownKeyTypeException only int and string keys are supported 
    */
   private static KeyClass getValue(CondExpr cd, AttrType type, int choice)
@@ -183,6 +203,9 @@ public class IndexUtils {
     case AttrType.attrInteger:
       if (choice == 1) return new IntegerKey(new Integer(cd.operand1.integer));
       else return new IntegerKey(new Integer(cd.operand2.integer));
+    case AttrType.attrStringString:
+    	if (choice == 1) return new StringStringKey(cd.operand1.string,"");
+    	else return new StringStringKey(cd.operand2.string,"");
     case AttrType.attrReal:
       /*
       // need FloatKey class in bt.java
@@ -190,7 +213,7 @@ public class IndexUtils {
       else return new FloatKey(new Float(cd.operand.real));
       */
     default:
-	throw new UnknownKeyTypeException("IndexUtils.java: Only Integer and String keys are supported so far");
+	throw new UnknownKeyTypeException("IndexUtils.java: Only Integer, String and (String, String) composite keys are supported so far");
     }
     
   }
