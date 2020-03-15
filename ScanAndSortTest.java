@@ -8,6 +8,7 @@ import bufmgr.*;
 import btree.*; 
 import catalog.*;
 import iterator.*;
+import java.util.Arrays;
 
 public class ScanAndSortTest implements GlobalConst {
     private static int   SORTPGNUM = 100; 
@@ -16,14 +17,14 @@ public class ScanAndSortTest implements GlobalConst {
         //Parsing arguments:
         if (args.length != 4 || args[0] == "-h")
         {
-            System.out.println("Enter correct arguments: \nbatchinsert DATAFILENAME TYPE BIGTABLENAME NUMBUFF");
+            System.out.println("Enter correct arguments: \nScanAndSortTest DATAFILENAME TYPE BIGTABLENAME NUMBUFF");
             return;
         }
 
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
         int numbuffs = Integer.parseInt(args[3]);
-        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
-        SystemDefs sysdef = new SystemDefs( dbpath, 12500, numbuffs, "Clock",  Integer.parseInt(databaseType));
+        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName+"_"+databaseType; 
+        SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock",  Integer.parseInt(databaseType));
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
@@ -52,7 +53,7 @@ public class ScanAndSortTest implements GlobalConst {
 
                 try {
                     bigTable.insertMap(m.returnMapByteArray());
-                    System.out.println("Inserted map value: " + attributes[3]);
+                    System.out.println("Inserted map row: " + attributes[3]);
                 }catch (Exception e) {
                     System.err.println("*** error in bigT.insertMap() ***");
                     e.printStackTrace();
@@ -89,7 +90,7 @@ public class ScanAndSortTest implements GlobalConst {
                 System.out.println(map1.getValue());
             }*/
 
-            // Sort Test
+            /*/ Sort Test
             // set up an identity selection
             CondExpr[] expr = new CondExpr[2];
             expr[0] = new CondExpr();
@@ -102,6 +103,7 @@ public class ScanAndSortTest implements GlobalConst {
             expr[1] = null;
             IndexScan iscan = new IndexScan ( new IndexType(IndexType.B_Index), bigtableName+"_"+databaseType,
                "row_index", "*", "*", "*", null);
+            */
 
             TupleOrder[] order = new TupleOrder[2];
             order[0] = new TupleOrder(TupleOrder.Ascending);
@@ -113,6 +115,7 @@ public class ScanAndSortTest implements GlobalConst {
                 }
                 System.out.println(map1.getValue());
             }
+            sort.close();
 
 
         }catch (IOException e) {
