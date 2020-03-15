@@ -879,11 +879,23 @@ public class bigT implements Filetype,  GlobalConst {
       
     }
   
+  /** Initiate a stream.
+	 * @exception InvalidTupleSizeException Invalid tuple size
+	 * @exception InvalidMapSizeException Invalid tuple size
+	 * @exception IOException I/O errors
+	 */
+	public Stream openStream(int orderType, String rowFilter, String columnFilter, String valueFilter)
+			throws InvalidTupleSizeException, InvalidMapSizeException,
+			IOException
+	{
+		Stream newStream = new Stream(this, orderType, rowFilter, columnFilter, valueFilter);
+		return newStream;
+	}
   
   /** Initiate a sequential scan.
    * @exception InvalidTupleSizeException Invalid tuple size
+   * @exception InvalidMapSizeException Invalid tuple size
    * @exception IOException I/O errors
-   *
    */
   public Scan openScan() 
     throws InvalidTupleSizeException, InvalidMapSizeException,
@@ -960,6 +972,7 @@ public class bigT implements Filetype,  GlobalConst {
 	}
       
       delete_file_entry( _fileName );
+      //System.out.println("Successfully deleted: "+_fileName);
     }
   
   /**
@@ -1104,6 +1117,6 @@ public class bigT implements Filetype,  GlobalConst {
 
   }
 
-
+  public String get_fileName() { return _fileName;}
   
 }// End of bigT 
