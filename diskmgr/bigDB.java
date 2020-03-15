@@ -48,6 +48,7 @@ public class bigDB implements GlobalConst {
     DBFirstPage firstpg = new DBFirstPage();
     firstpg.openPage(apage);
     num_pages = firstpg.getNumDBPages();
+    System.out.println(Arrays.toString(firstpg.data));
     
     unpinPage(pageId, false /* undirty*/);
     initIndex();
@@ -160,6 +161,34 @@ public class bigDB implements GlobalConst {
    */
   public void closeDB() throws IOException {
     fp.close();
+  }
+
+  /** Closes all the index files
+  */
+  public void closeIndex(){
+    try{
+      switch(type){
+
+        case 1: break;
+
+        case 2:
+        case 3: 
+              indices[0].close();
+              break;
+
+        case 4:
+        case 5:
+              indices[0].close();
+              indices[1].close();
+              break;
+
+        default: break;
+      }
+    }catch (Exception e) {
+      System.err.println("***** error closing the index ******");
+      e.printStackTrace();
+      Runtime.getRuntime().exit(1);
+    }
   }
   
   
@@ -599,7 +628,7 @@ public class bigDB implements GlobalConst {
     
     // Have to delete record at hpnum:slot
     tmppid.pid = INVALID_PAGE;
-    dp.setFileEntry(tmppid, "\0", slot);
+    dp.setFileEntry(tmppid, "", slot);
     
     unpinPage(hpid, true /*dirty*/);
     
@@ -630,7 +659,7 @@ public class bigDB implements GlobalConst {
     do
       {// Start DO01
 	
-	// System.out.println("get_file_entry do-loop01: "+name);
+	 //System.out.println("get_file_entry do-loop01: "+name);
         hpid.pid = nexthpid.pid;
 	
         // Pin the header page.
@@ -654,8 +683,11 @@ public class bigDB implements GlobalConst {
 	PageId tmppid = new PageId();
 	String tmpname;
 	
+  //System.out.println("Checking file page no. :"+nexthpid.pid);
+  //System.out.println(Arrays.toString(dp.data));
 	while(entry < dp.getNumOfEntries())
 	  {
+      //System.out.println("Looking at Entry No. :" +entry);
 	    tmpname = dp.getFileEntry(tmppid, entry);
 	    
 	    if((tmppid.pid != INVALID_PAGE)&&
@@ -1028,7 +1060,7 @@ class DBHeaderPage implements PageUsedBytes, GlobalConst {
     int position = START_FILE_ENTRIES + entryNo * SIZE_OF_FILE_ENTRY;
     pageNo.pid = Convert.getIntValue (position, data);
     if(pageNo.pid==INVALID_PAGE) return "";
-    //System.out.println(pageNo.pid + "\t" +Convert.getStrValue (position+4, data, MAX_NAME + 2) + "\t" +entryNo);
+    System.out.println(pageNo.pid + "\t" +Convert.getStrValue (position+4, data, MAX_NAME + 2) + "\t" +entryNo);
     return (Convert.getStrValue (position+4, data, MAX_NAME + 2));
   }
   
