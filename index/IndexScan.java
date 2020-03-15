@@ -172,7 +172,7 @@ public class IndexScan extends Iterator {
 
   // For range filter, we assume that there is no space, eg. [A,Y]
   private boolean checkFilters(String mapLabel, String filter){
-      if(filter == "" || filter == "*" || (mapLabel.compareTo(filter)==0) )
+      if(filter.equals("") || filter.equals("*") || (mapLabel.compareTo(filter)==0) )
         return true;
       else if(filter.charAt(0) == '['){
         //System.out.println(filter);
