@@ -75,6 +75,7 @@ public class SystemDefs {
       
       if ((MINIBASE_RESTART_FLAG)||(num_pgs == 0)||tempFile.exists()){//open an existing database
 	try {
+    System.out.println("Opening: " +dbname);
 	  JavabaseDB.openDB(dbname);
 	}
 	catch (Exception e) {
@@ -85,6 +86,7 @@ public class SystemDefs {
       } 
       else {
 	try {
+    System.out.println("Creating: " +dbname);
 	  JavabaseDB.openDB(dbname, num_pgs);
 	  //JavabaseBM.flushAllPages(); Commented out to keep the BTreeFile header page pinned
 	}
@@ -95,4 +97,18 @@ public class SystemDefs {
 	}
       }
     }
+
+  public void close(){
+    try{
+      JavabaseDB.closeIndex();
+      JavabaseBM.flushAllPages();
+      JavabaseDB.closeDB();
+    } catch(Exception e){
+      System.err.println ("Error Closing the Database");
+      e.printStackTrace();
+      Runtime.getRuntime().exit(1);
+    }
+    
+  }
+
 }
