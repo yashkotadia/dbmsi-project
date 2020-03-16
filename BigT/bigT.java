@@ -6,6 +6,8 @@ import bufmgr.*;
 import global.*;
 import heap.Tuple;
 import btree.*;
+import index.*;
+import iterator.*;
 
 /** This bigT implementation is heapfile directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
@@ -84,8 +86,6 @@ public class bigT implements Filetype,  GlobalConst {
       dpinfo.pageId.pid = pageId.pid;
       dpinfo.mapct = 0;
       dpinfo.availspace = hfpage.available_space();
-      dpinfo.rowct = 0;
-      dpinfo.colct = 0;
 
       return hfpage;
       
@@ -303,6 +303,95 @@ public class bigT implements Filetype,  GlobalConst {
       
     } // end of constructor 
   
+   /** Return number of distinct rows in bigT.	
+   *	
+   * @exception InvalidSlotNumberException invalid slot number	
+   * @exception InvalidTupleSizeException invalid tuple size	
+   * @exception HFBufMgrException exception thrown from bufmgr layer	
+   * @exception HFDiskMgrException exception thrown from diskmgr layer	
+   * @exception IOException I/O errors	
+   */	
+    public int getRowCnt() throws InvalidSlotNumberException, 	
+	   InvalidTupleSizeException, 	
+	   HFDiskMgrException,	
+	   HFBufMgrException,	
+	   IOException,	
+	   FileScanException,	
+	   SortException,	
+	   MapUtilsException,	
+	   UnknowAttrType,	
+	   LowMemException,	
+	   JoinsException,	
+	   Exception{	
+	   	Map map1 = new Map();	
+	    FileScan fscan = new FileScan(_fileName,"*", "*", "*");	
+        String prevRowLabel = "";	
+        int rowct = 0;	
+        TupleOrder[] order = new TupleOrder[2];	
+        order[0] = new TupleOrder(TupleOrder.Ascending);	
+        order[1] = new TupleOrder(TupleOrder.Descending);	
+        Sort sort = new Sort(order[0], fscan, 100, 1, 80); // OrderType = 1	
+        while(true){	
+        	map1 = sort.get_next();	
+            if(map1 == null){	
+                break;	
+            }	
+            if(!(map1.getRowLabel().equals(prevRowLabel))){	
+            	rowct++;	
+            }	
+            prevRowLabel = map1.getRowLabel();	
+            	
+        }	
+        sort.close();	
+        return rowct;	
+       	
+    }	
+   
+   /** Return number of distinct columns in bigT.	
+   *	
+   * @exception InvalidSlotNumberException invalid slot number	
+   * @exception InvalidTupleSizeException invalid tuple size	
+   * @exception HFBufMgrException exception thrown from bufmgr layer	
+   * @exception HFDiskMgrException exception thrown from diskmgr layer	
+   * @exception IOException I/O errors	
+   */	
+    public int getColumnCnt() throws InvalidSlotNumberException, 	
+	   InvalidTupleSizeException, 	
+	   HFDiskMgrException,	
+	   HFBufMgrException,	
+	   IOException,	
+	   FileScanException,	
+	   SortException,	
+	   MapUtilsException,	
+	   UnknowAttrType,	
+	   LowMemException,	
+	   JoinsException,	
+	   Exception{	
+	   	Map map1 = new Map();	
+	    FileScan fscan = new FileScan(_fileName,"*", "*", "*");	
+        String prevColumnLabel = "";	
+        int colct = 0;	
+        TupleOrder[] order = new TupleOrder[2];	
+        order[0] = new TupleOrder(TupleOrder.Ascending);	
+        order[1] = new TupleOrder(TupleOrder.Descending);	
+        Sort sort = new Sort(order[0], fscan, 100, 2, 80); // Ordertype = 2	
+        while(true){	
+        	map1 = sort.get_next();	
+            if(map1 == null){	
+                break;	
+            }	
+            if(!(map1.getColumnLabel().equals(prevColumnLabel))){	
+            	//System.out.println(map1.getColumnLabel());	
+            	colct++;	
+            }	
+            prevColumnLabel = map1.getColumnLabel();	
+            	
+        }	
+        sort.close();	
+        return colct;	
+       	
+    }
+
   /** Return number of maps in bigT.
    *
    * @exception InvalidSlotNumberException invalid slot number
@@ -373,6 +462,10 @@ public class bigT implements Filetype,  GlobalConst {
    * @exception HFBufMgrException exception thrown from bufmgr layer
    * @exception HFDiskMgrException exception thrown from diskmgr layer
    * @exception IOException I/O errors
+   * @exception FileScanException
+   * @exception IndexException,
+   * @exception JoinsException,
+   * @exception Exception
    *
    * @return the mid of the map
    */
@@ -383,7 +476,11 @@ public class bigT implements Filetype,  GlobalConst {
 	   HFException,
 	   HFBufMgrException,
 	   HFDiskMgrException,
-	   IOException
+	   IOException,
+	   FileScanException,
+	   IndexException,
+	   JoinsException,
+	   Exception
     {
       int dpinfoLen = 0;	
       int mapLen = mapPtr.length;
@@ -399,6 +496,76 @@ public class bigT implements Filetype,  GlobalConst {
       
       pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
       
+      Map scanmap = new Map(mapPtr, 0, mapLen);
+	  String rowfilter = scanmap.getRowLabel();
+	  String columnfilter = scanmap.getColumnLabel();
+	  MID mid = new MID();
+      Map map1 = new Map();
+      Map [] resultMapArr = new Map[3];
+	  MID [] resultmid = new MID[3];
+	  int resultMapCnt = 0;
+	  Iterator scan = null;
+	  CondExpr[] expr = new CondExpr[2];
+
+	  switch(SystemDefs.JavabaseDB.type){
+
+	  	case 1:
+	  		scan = new FileScan(_fileName,rowfilter, columnfilter, "*");
+	  		break;
+
+	  	case 2:
+            expr[0] = new CondExpr();
+            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+            expr[0].type2 = new AttrType(AttrType.attrString);
+            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+            expr[0].operand2.string = rowfilter;
+            expr[0].next = null;
+            expr[1] = null;
+            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_index", rowfilter, columnfilter, "*", null);
+            break;
+
+        case 3:
+            expr[0] = new CondExpr();
+            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+            expr[0].type2 = new AttrType(AttrType.attrString);
+            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+            expr[0].operand2.string = columnfilter;
+            expr[0].next = null;
+            expr[1] = null;
+            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_index", rowfilter, columnfilter, "*", null);
+            break;
+
+	  }
+	  while(resultMapCnt<3) {
+            if((map1 = scan.get_next()) == null){
+                scan.close();
+                break;
+            } 
+            resultMapArr[resultMapCnt] = new Map(map1);
+			resultmid[resultMapCnt] = new MID(scan.outmid.pageNo, scan.outmid.slotNo);
+			resultMapCnt++;
+      }
+
+      if(resultMapCnt == 3){
+          	int mintsindex = 0; // Need MID of minimum timestamp map which will be passed on to deleteMap()
+          	int mints = resultMapArr[0].getTimeStamp(); // Minimum timestamp in of the maps that match incoming map
+          	for(int i = 1; i<3; i++){
+          		if(resultMapArr[i].getTimeStamp() < mints){
+          			mints = resultMapArr[i].getTimeStamp();
+          			mintsindex = i;
+          		}
+          	}
+          	if(scanmap.getTimeStamp() <= mints){
+          		System.out.println("Inserting older map");
+          		return null;
+          	}
+
+          	System.out.println("Deleting old map");
+          	deleteMap(resultmid[mintsindex]);
+      }
+
       found = false;
       Tuple atuple;
       DataPageInfo dpinfo = new DataPageInfo();
@@ -585,12 +752,10 @@ public class bigT implements Filetype,  GlobalConst {
 	throw new HFException(null, "can't find Data page");
       
       
-      MID mid;
+      //MID mid;
       mid = currentDataPage.insertMap(mapPtr);
       
       dpinfo.mapct++;
-      //dpinfo.rowct++;
-      //dpinfo.colct++;
       dpinfo.availspace = currentDataPage.available_space();
       
       
@@ -603,8 +768,6 @@ public class bigT implements Filetype,  GlobalConst {
       
       dpinfo_ondirpage.availspace = dpinfo.availspace;
       dpinfo_ondirpage.mapct = dpinfo.mapct;
-      dpinfo_ondirpage.rowct = dpinfo.rowct;
-      dpinfo_ondirpage.colct = dpinfo.colct;
       dpinfo_ondirpage.pageId.pid = dpinfo.pageId.pid;
       dpinfo_ondirpage.flushToTuple();
       
