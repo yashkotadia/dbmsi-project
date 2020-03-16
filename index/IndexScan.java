@@ -123,6 +123,9 @@ public class IndexScan extends Iterator {
             
       // not index_only, need to return the whole tuple
       mid = new MID(((LeafData)nextentry.data).getData());
+      outmid.pageNo.pid = mid.pageNo.pid;    
+      outmid.slotNo = mid.slotNo;
+
       try {
 	map1 = bgt.getMap(mid);
       }
@@ -193,6 +196,6 @@ public class IndexScan extends Iterator {
   private CondExpr[]    _selects;
   private String        rowFilter;
   private String        columnFilter;
-  private String        valueFilter;     
+  private String        valueFilter; 
 }
 

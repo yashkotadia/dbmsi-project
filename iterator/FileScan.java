@@ -35,9 +35,7 @@ public class FileScan extends  Iterator
   private String columnFilter;
   private String valueFilter;
   private Map map1;
-  private int m1_size;
-
- 
+  private int m1_size; 
 
   /**
    *constructor
@@ -138,9 +136,11 @@ public class FileScan extends  Iterator
       MID mid = new MID();
       
       while(true) {
-	if((map1 =  scan.getNext(mid)) == null) {
-	  return null;
-	}
+      	if((map1 =  scan.getNext(mid)) == null)
+      	  return null;
+
+        outmid = new MID(scan.outmid.pageNo, scan.outmid.slotNo);
+	    
 	
   /*
 	tuple1.setHdr(in1_len, _in1, s_sizes);
@@ -164,11 +164,12 @@ public class FileScan extends  Iterator
     
     //System.out.print(map1.getRowLabel().length()+ " " + rowFilter);
     //System.out.println();
-    if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter)){
-          //System.out.println("Here");
-          return map1;
+        if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter)){
+              //System.out.println("Here");
+              return map1;
+        }
       }     
-    }
+    
   }
 
 

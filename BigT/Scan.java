@@ -52,6 +52,9 @@ public class Scan implements GlobalConst{
     /** record ID of the current record (from the current data page) */
     private MID usermid = new MID();
 
+    /** Map ID of the map just outputted (from the current data page) */
+    public MID outmid = new MID();
+
     /** Status of next user status */
     private boolean nextUserStatus;
     
@@ -97,6 +100,8 @@ public class Scan implements GlobalConst{
     
     mid.pageNo.pid = usermid.pageNo.pid;    
     mid.slotNo = usermid.slotNo;
+    outmid.pageNo.pid = usermid.pageNo.pid;    
+    outmid.slotNo = usermid.slotNo;
          
     try {
       recptrmap = datapage.getMap(mid);

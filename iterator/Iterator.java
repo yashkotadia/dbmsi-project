@@ -21,6 +21,11 @@ public abstract class Iterator implements Flags {
   public boolean closeFlag = false; // added by bingjie 5/4/98
 
   /**
+   * store the MID of previously outputted map
+   */
+  public MID outmid = new MID();
+
+  /**
    *abstract method, every subclass must implement it.
    *@return the result tuple
    *@exception IOException I/O errors
