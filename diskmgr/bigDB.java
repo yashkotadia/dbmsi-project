@@ -48,7 +48,7 @@ public class bigDB implements GlobalConst {
     DBFirstPage firstpg = new DBFirstPage();
     firstpg.openPage(apage);
     num_pages = firstpg.getNumDBPages();
-    System.out.println(Arrays.toString(firstpg.data));
+    //System.out.println(Arrays.toString(firstpg.data));
     
     unpinPage(pageId, false /* undirty*/);
     initIndex();
@@ -1064,7 +1064,7 @@ class DBHeaderPage implements PageUsedBytes, GlobalConst {
     int position = START_FILE_ENTRIES + entryNo * SIZE_OF_FILE_ENTRY;
     pageNo.pid = Convert.getIntValue (position, data);
     if(pageNo.pid==INVALID_PAGE) return "";
-    System.out.println(pageNo.pid + "\t" +Convert.getStrValue (position+4, data, MAX_NAME + 2) + "\t" +entryNo);
+    //System.out.println(pageNo.pid + "\t" +Convert.getStrValue (position+4, data, MAX_NAME + 2) + "\t" +entryNo);
     return (Convert.getStrValue (position+4, data, MAX_NAME + 2));
   }
   
