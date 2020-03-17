@@ -11,7 +11,7 @@ import BigT.*;
 /**
  * The Sort class sorts a file. All necessary information are passed as 
  * arguments to the constructor. After the constructor call, the user can
- * repeatly call <code>get_next()</code> to get tuples in sorted order.
+ * repeatedly call <code>get_next()</code> to get maps in sorted order.
  * After the sorting is done, the user should call <code>close()</code>
  * to clean up.
  */
@@ -60,7 +60,7 @@ public class Sort extends Iterator implements GlobalConst
    * Open an input buffer for each run, and insert the first element (min)
    * from each run into a heap. <code>delete_min() </code> will then get 
    * the minimum of all runs.
-   * @param tuple_size size (in bytes) of each tuple
+   * @param map_size size (in bytes) of each map
    * @param n_R_runs number of runs
    * @exception IOException from lower layers
    * @exception LowMemException there is not enough memory to 
@@ -98,7 +98,7 @@ public class Sort extends Iterator implements GlobalConst
       cur_node.run_num = i;
       
       // may need change depending on whether Get() returns the original
-      // or make a copy of the tuple, need io_bufs.java ???
+      // or makes a copy of the map, need io_bufs.java ???
       Map temp_map = new Map(map_size);
 
       /*try {
@@ -135,12 +135,13 @@ public class Sort extends Iterator implements GlobalConst
    * Generate sorted runs.
    * Using heap sort.
    * @param  max_elems    maximum number of elements in heap
-   * @param  sortFldType  attribute type of the sort field
-   * @param  sortFldLen   length of the sort field
    * @return number of runs generated
    * @exception IOException from lower layers
    * @exception SortException something went wrong in the lower layer. 
+   * @exception UnknowAttrType attrSymbol or attrNull encountered
+   * @exception TupleUtilsException error while comparing tuples
    * @exception JoinsException from <code>Iterator.get_next()</code>
+   * @exception Exception other exceptions.
    */
   private int generate_runs(int max_elems/*AttrType sortFldType, int sortFldLen*/) 
     throws IOException, 
@@ -214,8 +215,8 @@ public class Sort extends Iterator implements GlobalConst
     }
     
     // now the queue is full, starting writing to file while keep trying
-    // to add new tuples to the queue. The ones that does not fit are put
-    // on the other queue temperarily
+    // to add new map to the queue. The ones that do not fit are put on
+    // the other queue temporarily
     while (true) {
       cur_node = pcurr_Q.deq();
       if (cur_node == null) break; 
@@ -238,6 +239,8 @@ public class Sort extends Iterator implements GlobalConst
 	// need tuple_utils.java
 	//TupleUtils.SetValue(lastElem, cur_node.tuple, _sort_fld, sortFldType);
 
+    // set lastElem to have the row label, column label and
+    // time stamp of the current map
   lastElem.setRowLabel(cur_node.map.getRowLabel());
   lastElem.setColumnLabel(cur_node.map.getColumnLabel());
   lastElem.setTimeStamp(cur_node.map.getTimeStamp());
@@ -246,6 +249,7 @@ public class Sort extends Iterator implements GlobalConst
 	//	System.out.println("Putting tuple into run " + (run_num + 1)); 
 	//	cur_node.tuple.print(_in);
 	
+    // write map to output buffer
 	o_buf.Put(cur_node.map);
       }
       
@@ -282,8 +286,8 @@ public class Sort extends Iterator implements GlobalConst
 	// need io_bufs.java
 	o_buf.init(bufs, _n_pages, map_size, temp_files[run_num], false);
 	
-	// set the last Elem to be the minimum value for the sort field
 	if(order.tupleOrder == TupleOrder.Ascending) {
+		// set the last Elem to be the minimum value for the sort field
 	  try {
 	    MIN_VAL(lastElem);
 	  } catch (UnknowAttrType e) {
@@ -293,6 +297,7 @@ public class Sort extends Iterator implements GlobalConst
 	  } 
 	}
 	else {
+		// set the last Elem to be the maximum value for the sort field
 	  try {
 	    MAX_VAL(lastElem);
 	  } catch (UnknowAttrType e) {
@@ -324,7 +329,7 @@ public class Sort extends Iterator implements GlobalConst
 	    break;
 	  }
 	  cur_node = new pnode();
-	  cur_node.map = new Map(map); // tuple copy needed --  Bingjie 4/29/98 
+	  cur_node.map = new Map(map); // map copy needed 
 
 	  try {
 	    pcurr_Q.enq(cur_node);
@@ -338,10 +343,10 @@ public class Sort extends Iterator implements GlobalConst
       
       // Check if we are done
       if (p_elems_curr_Q == 0) {
-	// current queue empty despite our attemps to fill in
-	// indicating no more tuples from input
+	// current queue empty despite our attempts to fill in
+	// indicating no more maps from input
 	if (p_elems_other_Q == 0) {
-	  // other queue is also empty, no more tuples to write out, done
+	  // other queue is also empty, no more maps to write out, done
 	  break; // of the while(true) loop
 	}
 	else {
@@ -417,9 +422,10 @@ public class Sort extends Iterator implements GlobalConst
   
   /**
    * Remove the minimum value among all the runs.
-   * @return the minimum tuple removed
+   * @return the minimum map removed
    * @exception IOException from lower layers
    * @exception SortException something went wrong in the lower layer. 
+   * @exception Exception other exceptions.
    */
   private Map delete_min() 
     throws IOException, 
@@ -435,11 +441,11 @@ public class Sort extends Iterator implements GlobalConst
     System.out.print("Get ");
     old_tuple.print(_in);
     */
-    // we just removed one tuple from one run, now we need to put another
-    // tuple of the same run into the queue
+    // we just removed one map from one run, now we need to put another
+    // map of the same run into the queue
     if (i_buf[cur_node.run_num].empty() != true) { 
       // run not exhausted 
-      new_map = new Map(map_size); // need tuple.java??
+      new_map = new Map(map_size); // need Map.java
 
       /*try {
 	new_tuple.setHdr(n_cols, _in, str_lens);
@@ -470,13 +476,14 @@ public class Sort extends Iterator implements GlobalConst
     }
 
     // changed to return Tuple instead of return char array ????
+    
+    // return map
     return old_map; 
   }
   
   /**
    * Set lastElem to be the minimum value of the appropriate type
-   * @param lastElem the tuple
-   * @param sortFldType the sort field type
+   * @param lastElem the map
    * @exception IOException from lower layers
    * @exception UnknowAttrType attrSymbol or attrNull encountered
    */
@@ -522,8 +529,7 @@ public class Sort extends Iterator implements GlobalConst
 
   /**
    * Set lastElem to be the maximum value of the appropriate type
-   * @param lastElem the tuple
-   * @param sortFldType the sort field type
+   * @param lastElem the map
    * @exception IOException from lower layers
    * @exception UnknowAttrType attrSymbol or attrNull encountered
    */
@@ -567,16 +573,13 @@ public class Sort extends Iterator implements GlobalConst
   }
   
   /** 
-   * Class constructor, take information about the tuples, and set up 
+   * Class constructor, take information about the maps, and set up 
    * the sorting
-   * @param in array containing attribute types of the relation
-   * @param len_in number of columns in the relation
-   * @param str_sizes array of sizes of string attributes
-   * @param am an iterator for accessing the tuples
-   * @param sort_fld the field number of the field to sort on
    * @param sort_order the sorting order (ASCENDING, DESCENDING)
-   * @param sort_field_len the length of the sort field
+   * @param am an iterator for accessing the maps
    * @param n_pages amount of memory (in pages) available for sorting
+   * @param oType the order type
+   * @param valueSize size of the map
    * @exception IOException from lower layers
    * @exception SortException something went wrong in the lower layer. 
    */
@@ -690,15 +693,15 @@ public class Sort extends Iterator implements GlobalConst
   }
   
   /**
-   * Returns the next tuple in sorted order.
-   * Note: You need to copy out the content of the tuple, otherwise it
+   * Returns the next map in sorted order.
+   * Note: You need to copy out the content of the map, otherwise it
    *       will be overwritten by the next <code>get_next()</code> call.
-   * @return the next tuple, null if all tuples exhausted
+   * @return the next map, null if all maps exhausted
    * @exception IOException from lower layers
    * @exception SortException something went wrong in the lower layer. 
-   * @exception JoinsException from <code>generate_runs()</code>.
    * @exception UnknowAttrType attribute type unknown
    * @exception LowMemException memory low exception
+   * @exception JoinsException from <code>generate_runs()</code>.
    * @exception Exception other exceptions
    */
   public Map get_next() 
@@ -723,7 +726,7 @@ public class Sort extends Iterator implements GlobalConst
     }
     
     if (Q.empty()) {  
-      // no more tuples availble
+      // no more maps available
       return null;
     }
     

@@ -59,7 +59,7 @@ public class pnodeSplayPQ extends pnodePQ
    * @exception IOException from lower layers
    * @exception UnknowAttrType <code>attrSymbol</code> or 
    *                           <code>attrNull</code> encountered
-   * @exception TupleUtilsException error in tuple compare routines
+   * @exception MapUtilsException error in map compare routines
    */
   public void enq(pnode item) throws IOException, UnknowAttrType, MapUtilsException 
   {
