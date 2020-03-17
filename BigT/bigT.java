@@ -496,75 +496,77 @@ public class bigT implements Filetype,  GlobalConst {
       
       pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
       
-      Map scanmap = new Map(mapPtr, 0, mapLen);
-	  String rowfilter = scanmap.getRowLabel();
-	  String columnfilter = scanmap.getColumnLabel();
-	  MID mid = new MID();
-      Map map1 = new Map();
-      Map [] resultMapArr = new Map[3];
-	  MID [] resultmid = new MID[3];
-	  int resultMapCnt = 0;
-	  Iterator scan = null;
-	  CondExpr[] expr = new CondExpr[2];
+      if(_ftype==ORDINARY){
+	      Map scanmap = new Map(mapPtr, 0, mapLen);
+		  String rowfilter = scanmap.getRowLabel();
+		  String columnfilter = scanmap.getColumnLabel();
+		  MID mid = new MID();
+	      Map map1 = new Map();
+	      Map [] resultMapArr = new Map[3];
+		  MID [] resultmid = new MID[3];
+		  int resultMapCnt = 0;
+		  Iterator scan = null;
+		  CondExpr[] expr = new CondExpr[2];
 
-	  switch(SystemDefs.JavabaseDB.type){
+		  switch(SystemDefs.JavabaseDB.type){
 
-	  	case 1:
-	  		scan = new FileScan(_fileName,rowfilter, columnfilter, "*");
-	  		break;
+		  	default:
+		  		scan = new FileScan(_fileName,rowfilter, columnfilter, "*");
+		  		break;
 
-	  	case 2:
-            expr[0] = new CondExpr();
-            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
-            expr[0].type1 = new AttrType(AttrType.attrSymbol);
-            expr[0].type2 = new AttrType(AttrType.attrString);
-            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
-            expr[0].operand2.string = rowfilter;
-            expr[0].next = null;
-            expr[1] = null;
-            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_index", rowfilter, columnfilter, "*", null);
-            break;
+		  	case 2:
+	            expr[0] = new CondExpr();
+	            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+	            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+	            expr[0].type2 = new AttrType(AttrType.attrString);
+	            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+	            expr[0].operand2.string = rowfilter;
+	            expr[0].next = null;
+	            expr[1] = null;
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_index", rowfilter, columnfilter, "*", null);
+	            break;
 
-        case 3:
-            expr[0] = new CondExpr();
-            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
-            expr[0].type1 = new AttrType(AttrType.attrSymbol);
-            expr[0].type2 = new AttrType(AttrType.attrString);
-            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
-            expr[0].operand2.string = columnfilter;
-            expr[0].next = null;
-            expr[1] = null;
-            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_index", rowfilter, columnfilter, "*", null);
-            break;
+	        case 3:
+	            expr[0] = new CondExpr();
+	            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+	            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+	            expr[0].type2 = new AttrType(AttrType.attrString);
+	            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+	            expr[0].operand2.string = columnfilter;
+	            expr[0].next = null;
+	            expr[1] = null;
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_index", rowfilter, columnfilter, "*", null);
+	            break;
 
+		  }
+		  while(resultMapCnt<3) {
+	            if((map1 = scan.get_next()) == null){
+	                scan.close();
+	                break;
+	            } 
+	            resultMapArr[resultMapCnt] = new Map(map1);
+				resultmid[resultMapCnt] = new MID(scan.outmid.pageNo, scan.outmid.slotNo);
+				resultMapCnt++;
+	      }
+
+	      if(resultMapCnt == 3){
+	          	int mintsindex = 0; // Need MID of minimum timestamp map which will be passed on to deleteMap()
+	          	int mints = resultMapArr[0].getTimeStamp(); // Minimum timestamp in of the maps that match incoming map
+	          	for(int i = 1; i<3; i++){
+	          		if(resultMapArr[i].getTimeStamp() < mints){
+	          			mints = resultMapArr[i].getTimeStamp();
+	          			mintsindex = i;
+	          		}
+	          	}
+	          	if(scanmap.getTimeStamp() <= mints){
+	          		System.out.println("Inserting older map");
+	          		return null;
+	          	}
+
+	          	System.out.println("Deleting old map");
+	          	deleteMap(resultmid[mintsindex]);
+	      }
 	  }
-	  while(resultMapCnt<3) {
-            if((map1 = scan.get_next()) == null){
-                scan.close();
-                break;
-            } 
-            resultMapArr[resultMapCnt] = new Map(map1);
-			resultmid[resultMapCnt] = new MID(scan.outmid.pageNo, scan.outmid.slotNo);
-			resultMapCnt++;
-      }
-
-      if(resultMapCnt == 3){
-          	int mintsindex = 0; // Need MID of minimum timestamp map which will be passed on to deleteMap()
-          	int mints = resultMapArr[0].getTimeStamp(); // Minimum timestamp in of the maps that match incoming map
-          	for(int i = 1; i<3; i++){
-          		if(resultMapArr[i].getTimeStamp() < mints){
-          			mints = resultMapArr[i].getTimeStamp();
-          			mintsindex = i;
-          		}
-          	}
-          	if(scanmap.getTimeStamp() <= mints){
-          		System.out.println("Inserting older map");
-          		return null;
-          	}
-
-          	System.out.println("Deleting old map");
-          	deleteMap(resultmid[mintsindex]);
-      }
 
       found = false;
       Tuple atuple;
@@ -752,7 +754,7 @@ public class bigT implements Filetype,  GlobalConst {
 	throw new HFException(null, "can't find Data page");
       
       
-      //MID mid;
+      MID mid;
       mid = currentDataPage.insertMap(mapPtr);
       
       dpinfo.mapct++;
