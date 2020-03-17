@@ -208,7 +208,7 @@ public class Sort extends Iterator implements GlobalConst
 	break;
       }
       cur_node = new pnode();
-      cur_node.map = new Map(map); // tuple copy needed --  Bingjie 4/29/98 
+      cur_node.map = new Map(map); 
 
       pcurr_Q.enq(cur_node);
       p_elems_curr_Q ++;
@@ -222,7 +222,7 @@ public class Sort extends Iterator implements GlobalConst
       if (cur_node == null) break; 
       p_elems_curr_Q --;
       
-      comp_res = MapUtils.CompareMapWithMap(cur_node.map, lastElem, orderType);  // need tuple_utils.java
+      comp_res = MapUtils.CompareMapWithMap(cur_node.map, lastElem, orderType);  // need map_utils.java
       
       if ((comp_res < 0 && order.tupleOrder == TupleOrder.Ascending) || (comp_res > 0 && order.tupleOrder == TupleOrder.Descending)) {
 	// doesn't fit in current run, put into the other queue
@@ -350,7 +350,7 @@ public class Sort extends Iterator implements GlobalConst
 	  break; // of the while(true) loop
 	}
 	else {
-	  // generate one more run for all tuples in the other queue
+	  // generate one more run for all maps in the other queue
 	  // close current run and start next run
 	  n_maps[run_num] = (int) o_buf.flush();  // need io_bufs.java
 	  run_num ++;
@@ -579,7 +579,7 @@ public class Sort extends Iterator implements GlobalConst
    * @param am an iterator for accessing the maps
    * @param n_pages amount of memory (in pages) available for sorting
    * @param oType the order type
-   * @param valueSize size of the map
+   * @param valueSize arbitrary size of the map (set to 80)
    * @exception IOException from lower layers
    * @exception SortException something went wrong in the lower layer. 
    */
@@ -766,6 +766,10 @@ public class Sort extends Iterator implements GlobalConst
 	}
 	for (int i=0; i<_n_pages; i++) bufs_pids[i].pid = INVALID_PAGE;
       }
+
+    for(SpoofIbuf spoofIbuf : i_buf){
+      spoofIbuf.close();
+    }
       
       for (int i = 0; i<temp_files.length; i++) {
 	if (temp_files[i] != null) {
