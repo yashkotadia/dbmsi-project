@@ -27,7 +27,7 @@ public abstract class Iterator implements Flags {
 
   /**
    *abstract method, every subclass must implement it.
-   *@return the result tuple
+   *@return the result map
    *@exception IOException I/O errors
    *@exception JoinsException some join exception
    *@exception IndexException exception from super class    
@@ -107,6 +107,12 @@ public abstract class Iterator implements Flags {
 	freePage(PageIds[i]);
       }
     }
+  
+  /**
+   * frees a buffer page
+   * @param pageno page ID
+   * @throws IteratorBMException exception from bufmgr class
+   */
 
   private void freePage(PageId pageno)
     throws IteratorBMException {
@@ -119,7 +125,14 @@ public abstract class Iterator implements Flags {
     }
     
   } // end of freePage
-
+  
+  /**
+   * allocates new pages
+   * @param page page
+   * @param num number of pages
+   * @return page ID of the first page
+   * @throws IteratorBMException exception from bufmgr class
+   */
   private PageId newPage(Page page, int num)
     throws IteratorBMException {
     

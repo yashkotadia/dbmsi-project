@@ -50,7 +50,7 @@ public abstract class pnodePQ
    * @exception IOException from lower layers
    * @exception UnknowAttrType <code>attrSymbol</code> or
    *                           <code>attrNull</code> encountered
-   * @exception TupleUtilsException error in tuple compare routines
+   * @exception MapUtilsException error in map compare routines
    */
   abstract public void  enq(pnode  item) 
            throws IOException, UnknowAttrType, MapUtilsException;      
@@ -67,13 +67,14 @@ public abstract class pnodePQ
    * compares two elements.
    * @param a one of the element for comparison
    * @param b the other element for comparison
+   * @param ordertype the order type
    * @return  <code>0</code> if the two are equal,
    *          <code>1</code> if <code>a</code> is greater,
    *         <code>-1</code> if <code>b</code> is greater
    * @exception IOException from lower layers
    * @exception UnknowAttrType <code>attrSymbol</code> or 
    *                           <code>attrNull</code> encountered
-   * @exception TupleUtilsException error in tuple compare routines
+   * @exception MapUtilsException error in map compare routines
    */
   public int pnodeCMP(pnode a, pnode b, int ordertype) 
          throws IOException, UnknowAttrType, MapUtilsException {
@@ -85,12 +86,13 @@ public abstract class pnodePQ
    * tests whether the two elements are equal.
    * @param a one of the element for comparison
    * @param b the other element for comparison
+   * @param ordertype the order type
    * @return <code>true</code> if <code>a == b</code>,
    *         <code>false</code> otherwise
    * @exception IOException from lower layers
    * @exception UnknowAttrType <code>attrSymbol</code> or 
    *                           <code>attrNull</code> encountered
-   * @exception TupleUtilsException error in tuple compare routines
+   * @exception MapUtilsException error in map compare routines
    */  
   public boolean pnodeEQ(pnode a, pnode b, int ordertype) throws IOException, UnknowAttrType, MapUtilsException {
     return pnodeCMP(a, b, ordertype) == 0;

@@ -7,14 +7,14 @@ import BigT.*;
 import java.io.*;
 
 /**
- *O_buf::Put takes tuples and stores them on the buffer pages that
+ *O_buf::Put takes maps and stores them on the buffer pages that
  *were passed to O_buf::init.  O_buf::flush inserts them enmass into
- *a temporary HeapFile.
+ *a temporary bigT.
  */
 public class OBuf implements GlobalConst{
   
   /**
-   *fault constructor
+   * default constructor
    * no args -- use init to initialize
    */
   public OBuf(){}     
@@ -25,8 +25,8 @@ public class OBuf implements GlobalConst{
    * O_buf is an output buffer. It takes as input:
    *@param bufs  temporary buffer to pages.(EACH ELEMENT IS A SINGLE BUFFER PAGE).
    *@param n_pages the number of pages
-   *@param tSize   tuple size
-   *@param temp_fd  fd of a  HeapFile
+   *@param mSize   map size
+   *@param temp_fd  fd of a  bigT
    *@param buffer  true => it is used as a buffer => if it is flushed, print
    *                      a nasty message. it is false by default.
   */
@@ -49,9 +49,9 @@ public class OBuf implements GlobalConst{
     }
   
   /**
-   * Writes a tuple to the output buffer
-   *@param buf the tuple written to buffer
-   *@return the position of tuple which is in buffer 
+   * Writes a map to the output buffer
+   *@param buf the map written to buffer
+   *@return the position of map which is in buffer 
    *@exception IOException  some I/O fault
    *@exception Exception other exceptions
    */
@@ -84,8 +84,8 @@ public class OBuf implements GlobalConst{
     }
   
   /**
-   * returns the # of tuples written.
-   *@return the numbers of tuples written
+   * returns the # of maps written.
+   *@return the numbers of maps written
    *@exception IOException some I/O fault
    *@exception Exception other exceptions
    */
@@ -102,7 +102,7 @@ public class OBuf implements GlobalConst{
 	  for (count = 0; count <= curr_page; count++)
 	    {
 	      MID mid;
-	      // Will have to go thru entire buffer writing tuples to disk
+	      // Will have to go thru entire buffer writing maps to disk
 	      
 	      if (count == curr_page)
 		for (int i = 0; i < m_wr_to_pg; i++)
@@ -135,15 +135,15 @@ public class OBuf implements GlobalConst{
     }
   
   private boolean dirty;                                // Does this buffer contain dirty pages?
-  private  int  m_per_pg,                        // # of tuples that fit in 1 page
-    m_in_buf;                        // # of tuples that fit in the buffer
-  private  int  m_wr_to_pg,                        // # of tuples written to current page
-    m_wr_to_buf;                        // # of tuples written to buffer.
+  private  int  m_per_pg,                        // # of maps that fit in 1 page
+    m_in_buf;                        // # of maps that fit in the buffer
+  private  int  m_wr_to_pg,                        // # of maps written to current page
+    m_wr_to_buf;                        // # of maps written to buffer.
   private  int  curr_page;                        // Current page being written to.
   private  byte[][]_bufs;                        // Array of pointers to buffer pages.
   private  int  _n_pages;                        // number of pages in array
-  private  int  m_size;                                // Size of a tuple
-  private  long m_written;                        // # of tuples written so far.
+  private  int  m_size;                                // Size of a map
+  private  long m_written;                        // # of maps written so far.
   private  int  TEST_temp_fd;                        // fd of a temporary file
   private  bigT _temp_fd;
   private  boolean buffer_only;
