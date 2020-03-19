@@ -152,9 +152,9 @@ public class Convert{
       in = new ByteArrayInputStream(tmp);
       instr = new DataInputStream(in);
       value[0] = instr.readUTF();
-      System.out.println(value[0]);
+      //System.out.println(value[0]);
       value[1] = instr.readUTF();
-      System.out.println(value[1]);
+      //System.out.println(value[1]);
       return value;
     }
   
