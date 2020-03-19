@@ -12,7 +12,7 @@ public class query implements GlobalConst {
     private static void InsertMaps(bigT bigTable)
     {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("/home/sanika/Sanika_DBMSI/dbmsiPhase2Debug/project2_testdata.csv"));
+            BufferedReader br = new BufferedReader(new FileReader("project2_testdata.csv"));
 
             String line = br.readLine();
 
@@ -47,7 +47,6 @@ public class query implements GlobalConst {
     }
 
     public static void main(String[] args) {
-        int   SORTPGNUM = 12;
         //Parsing arguments:
         if (args.length != 7 || args[0] == "-h") {
             System.out.println("Enter correct arguments: \nquery BIGTABLENAME TYPE ORDERTYPE ROWFILTER COLUMNFILTER VALUEFILTER NUMBUF\n");
@@ -58,7 +57,7 @@ public class query implements GlobalConst {
         int numbuffs = Integer.parseInt(args[6]), orderType = Integer.parseInt(args[2]);
 
         String dbpath = "/tmp/" + System.getProperty("user.name") + bigtableName;
-        SystemDefs sysdef = new SystemDefs(dbpath, 10000, numbuffs, "Clock", Integer.parseInt(databaseType));
+        SystemDefs sysdef = new SystemDefs(dbpath, 20000, numbuffs, "Clock", Integer.parseInt(databaseType));
 
 
         bigT bigTable = null;
@@ -79,6 +78,7 @@ public class query implements GlobalConst {
 
 
             stream.closestream();
+            sysdef.close();
         }
         catch (Exception e) {
             System.err.println("*** error in retrieving bigTable ***");
