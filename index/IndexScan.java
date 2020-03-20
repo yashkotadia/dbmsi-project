@@ -163,6 +163,7 @@ public class IndexScan extends Iterator {
       if (indScan instanceof BTFileScan) {
 	try {
 	  ((BTFileScan)indScan).DestroyBTreeFileScan();
+    ((BTreeFile)indFile).close();
 	}
 	catch(Exception e) {
 	  throw new IndexException(e, "BTree error in destroying index scan.");
