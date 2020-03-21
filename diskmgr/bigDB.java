@@ -74,21 +74,21 @@ public class bigDB implements GlobalConst {
         case 1: break;
 
         case 2: 
-              indices[0] = new BTreeFile("row_index", AttrType.attrString, ROW_LABEL_SIZE, 1);
+              indices[0] = new BTreeFile("row_index", AttrType.attrString, ROW_LABEL_SIZE, 0);
               break;
 
         case 3:
-              indices[0] = new BTreeFile("column_index", AttrType.attrString, COLUMN_LABEL_SIZE, 1);
+              indices[0] = new BTreeFile("column_index", AttrType.attrString, COLUMN_LABEL_SIZE, 0);
               break;
 
         case 4:
-              indices[0] = new BTreeFile("column_row_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 1);
-              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 1);
+              indices[0] = new BTreeFile("column_row_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
+              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 0);
               break;
 
         case 5:
-              indices[0] = new BTreeFile("row_value_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 1);
-              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 1);
+              indices[0] = new BTreeFile("row_value_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
+              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 0);
               break;
 
         default: break;
