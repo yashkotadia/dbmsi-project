@@ -123,8 +123,7 @@ public class IndexScan extends Iterator {
             
       // not index_only, need to return the whole tuple
       mid = new MID(((LeafData)nextentry.data).getData());
-      outmid.pageNo.pid = mid.pageNo.pid;    
-      outmid.slotNo = mid.slotNo;
+      outmid = new MID(mid.pageNo, mid.slotNo);
 
       try {
 	map1 = bgt.getMap(mid);
@@ -134,10 +133,14 @@ public class IndexScan extends Iterator {
       }
 
       //System.out.println(map1==null);
-    
-      if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter)){
+      
+      try{
+        if(checkFilters(map1.getRowLabel(), rowFilter) && checkFilters(map1.getColumnLabel(), columnFilter) && checkFilters(map1.getValue(), valueFilter)){
           //System.out.println("Here");
           return map1;
+        }
+      } catch(NullPointerException e){
+        System.out.println(map1==null);
       }     
 
       try {
