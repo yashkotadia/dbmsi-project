@@ -53,7 +53,7 @@ public class ScanAndSortTest implements GlobalConst {
 
                 try {
                     bigTable.insertMap(m.returnMapByteArray());
-                    System.out.println("Inserted map row: " + attributes[3]);
+                    System.out.println("Processed map value: " + attributes[3]);
                 }catch (Exception e) {
                     System.err.println("*** error in bigT.insertMap() ***");
                     e.printStackTrace();
@@ -64,22 +64,21 @@ public class ScanAndSortTest implements GlobalConst {
             }
             
             //Scan Test
-
+            int numMaps = 0;
             Scan scan = bigTable.openScan();
             MID mid = new MID();
             Map map1 = new Map();
             while(true) {
                 if((map1 =  scan.getNext(mid)) == null) 
                     break;
-                System.out.println(map1.getValue());
+                System.out.println("Scanned Map Value: " +map1.getValue());
+                numMaps++;
             }
-
-            //for(int i=0; i<30; i++)
-            //    SystemDefs.JavabaseDB.add_file_entry("check"+i, new PageId(0));
+            scan.closescan();
 
             // FileScanTest 
 
-            FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"*", "*", "*");
+            //FileScan fscan = new FileScan(bigtableName+"_"+databaseType,"*", "*", "*");
             /*
             while(true) {
                 if((map1 =  fscan.get_next()) == null){
@@ -104,7 +103,7 @@ public class ScanAndSortTest implements GlobalConst {
             IndexScan iscan = new IndexScan ( new IndexType(IndexType.B_Index), bigtableName+"_"+databaseType,
                "row_index", "*", "*", "*", null);
             */
-
+            /*
             TupleOrder[] order = new TupleOrder[2];
             order[0] = new TupleOrder(TupleOrder.Ascending);
             order[1] = new TupleOrder(TupleOrder.Descending);
@@ -113,9 +112,13 @@ public class ScanAndSortTest implements GlobalConst {
                 if((map1 = sort.get_next()) == null){
                     break;
                 }
-                System.out.println(map1.getValue());
+                //System.out.println(map1.getValue());
             }
-            sort.close();
+            sort.close();*/
+            System.out.println("Number of maps: "+bigTable.getMapCnt());
+            System.out.println("Distinct Row Count: "+bigTable.getRowCnt());
+            System.out.println("Distinct Column Count: "+bigTable.getColumnCnt());
+
             sysdef.close();
 
         }catch (IOException e) {
