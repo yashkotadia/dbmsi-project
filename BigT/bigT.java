@@ -135,6 +135,7 @@ public class bigT implements Filetype,  GlobalConst {
 	      }
 	      catch (InvalidSlotNumberException e)// check error! return false(done) 
 		{
+	      unpinPage(currentDirPageId, false/*undirty*/);
 		  return false;
 		}
 	      
@@ -160,7 +161,15 @@ public class bigT implements Filetype,  GlobalConst {
 	      
 	      if(dpinfo.pageId.pid==mid.pageNo.pid)
 		{
-		  amap = currentDataPage.returnMap(mid);
+		  try{
+		  	amap = currentDataPage.returnMap(mid);
+		  }
+	      catch (InvalidSlotNumberException e)// check error! return false(done) 
+		{
+	      unpinPage(currentDirPageId, false/*undirty*/);
+	      unpinPage(dpinfo.pageId, false/*undirty*/);
+		  return false;
+		}
 		  // found user's record on the current datapage which itself
 		  // is indexed on the current dirpage.  Return both of these.
 		  
@@ -493,7 +502,7 @@ public class bigT implements Filetype,  GlobalConst {
       HFPage nextDirPage = new HFPage(); 
       PageId currentDirPageId = new PageId(_firstDirPageId.pid);
       PageId nextDirPageId = new PageId();  // OK
-      
+      //System.out.println("Pinning Directory Page: bigT.insertMap()");
       pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
       
       if(_ftype==ORDINARY){
@@ -511,6 +520,7 @@ public class bigT implements Filetype,  GlobalConst {
 		  switch(SystemDefs.JavabaseDB.type){
 
 		  	default:
+		  		//System.out.println("Opened File Scan");
 		  		scan = new FileScan(_fileName,rowfilter, columnfilter, "*");
 		  		break;
 
@@ -523,7 +533,7 @@ public class bigT implements Filetype,  GlobalConst {
 	            expr[0].operand2.string = rowfilter;
 	            expr[0].next = null;
 	            expr[1] = null;
-	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_index", rowfilter, columnfilter, "*", null);
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_index", rowfilter, columnfilter, "*", expr);
 	            break;
 
 	        case 3:
@@ -535,19 +545,68 @@ public class bigT implements Filetype,  GlobalConst {
 	            expr[0].operand2.string = columnfilter;
 	            expr[0].next = null;
 	            expr[1] = null;
-	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_index", rowfilter, columnfilter, "*", null);
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_index", rowfilter, columnfilter, "*", expr);
 	            break;
+	        
+	        case 4:
+	        	String[] eq = {columnfilter, rowfilter};
+	        	expr[0] = new CondExpr();
+	            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+	            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+	            expr[0].type2 = new AttrType(AttrType.attrStringString);
+	            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+	            expr[0].operand2.stringstring = eq;
+	            expr[0].next = null;
+	            expr[1] = null;
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "column_row_index", rowfilter, columnfilter, "*", expr);
+	            break;
+	        
+	        case 5:
+	            String[] ge = new String[2];
+		        char[] c = new char[1];
+	    		c[0] = Character.MIN_VALUE;
+	    		ge[0] = rowfilter; 
+	    		ge[1] = new String(c);
+	        	
+	        	String[] le = new String[2];
+	        	char[] d = new char[1];
+	    		d[0] = Character.MAX_VALUE;
+	    		le[0] = rowfilter; 
+	    		le[1] = new String(d);
+	        	
+	            expr = new CondExpr[3];
+	            expr[0] = new CondExpr();
+	            expr[0].op = new AttrOperator(AttrOperator.aopGE);
+	            expr[0].type1 = new AttrType(AttrType.attrSymbol);
+	            expr[0].type2 = new AttrType(AttrType.attrStringString);
+	            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+	            expr[0].operand2.stringstring = ge;
+	            expr[0].next = null;
+	            expr[1] = new CondExpr();
+	            expr[1].op = new AttrOperator(AttrOperator.aopLE);
+	            expr[1].type1 = new AttrType(AttrType.attrSymbol);
+	            expr[1].type2 = new AttrType(AttrType.attrStringString);
+	            expr[1].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+	            expr[1].operand2.stringstring = le;
+	            expr[1].next = null;
+	            expr[2] = null;
+	            scan = new IndexScan ( new IndexType(IndexType.B_Index), _fileName, "row_value_index", rowfilter, columnfilter, "*", expr);
+	            break;
+	        			
+
 
 		  }
 		  while(resultMapCnt<3) {
 	            if((map1 = scan.get_next()) == null){
-	                scan.close();
 	                break;
 	            } 
 	            resultMapArr[resultMapCnt] = new Map(map1);
 				resultmid[resultMapCnt] = new MID(scan.outmid.pageNo, scan.outmid.slotNo);
 				resultMapCnt++;
 	      }
+
+	      scan.close();
+	      //System.out.println("#Previous Copies: "+resultMapCnt);
 
 	      if(resultMapCnt == 3){
 	          	int mintsindex = 0; // Need MID of minimum timestamp map which will be passed on to deleteMap()
@@ -560,11 +619,13 @@ public class bigT implements Filetype,  GlobalConst {
 	          	}
 	          	if(scanmap.getTimeStamp() <= mints){
 	          		System.out.println("Inserting older map");
+	          		unpinPage(currentDirPageId, false/*clean*/);
 	          		return null;
 	          	}
 
 	          	System.out.println("Deleting old map");
 	          	deleteMap(resultmid[mintsindex]);
+	          	deleteMapIndex( resultMapArr[mintsindex], resultmid[mintsindex]);
 	      }
 	  }
 
@@ -776,7 +837,7 @@ public class bigT implements Filetype,  GlobalConst {
       
       unpinPage(currentDirPageId, true /* = DIRTY */);
       if(_ftype == ORDINARY)
-      	insertMapIndex(mid, mapPtr); // Update the index      
+      	insertMapIndex(new MID(mid.pageNo, mid.slotNo), mapPtr); // Update the index      
       
       return mid;
       
@@ -1019,26 +1080,22 @@ public class bigT implements Filetype,  GlobalConst {
       PageId currentDataPageId = new PageId();
       RID currentDataPageRid = new RID();
       
-      status = _findDataPage(mid,
-			     currentDirPageId, dirPage, 
-			     currentDataPageId, dataPage,
-			     currentDataPageRid);
-      
-      if(status != true) return null; // map not found 
-      
+      pinPage(mid.pageNo, dataPage, false/*read disk*/);
+            
       Map amap = new Map();
-      amap = dataPage.getMap(mid);
+      try{
+      	amap = dataPage.getMap(mid);
+      } catch (InvalidSlotNumberException e){
+      } finally {
+      	unpinPage(mid.pageNo,false /*undirty*/);
+      }
+      
       
       /*
        * getMap has copied the contents of mid into mapPtr and fixed up
        * mapLen also.  We simply have to unpin dirpage and datapage which
        * were originally pinned by _findDataPage.
-       */    
-      
-      unpinPage(currentDataPageId,false /*undirty*/);
-      
-      unpinPage(currentDirPageId,false /*undirty*/);
-      
+       */ 
       
       return  amap;  //(true?)OK, but the caller need check if amap==NULL
       
@@ -1268,14 +1325,54 @@ public class bigT implements Filetype,  GlobalConst {
 	  				break;
 	  	}
 	  	/*
-	  	if(m.getValue().equals("1000")){
+	  	if(true){
 	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
 	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
-	  	}
-	  	*/
+	  	}*/
+	  	
 
 	}catch (Exception e) {
 		System.err.println("***** Error while inserting Map into index insertMapIndex() *******");
+      	e.printStackTrace();
+      	Runtime.getRuntime().exit(1);
+    }
+
+  }
+
+  /** Called in insertMap, used to update the BTreeFile on implicit deletion
+  *  @param m Map to be deleted
+  *  @param mid Map ID of the map whose key is being deleted
+  */
+  private void deleteMapIndex(Map m, MID mid){
+
+  	try{
+	  	switch(SystemDefs.JavabaseDB.type){
+	  		default: break;
+
+	  		case 2:
+	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringKey(m.getRowLabel()), mid);
+	  				break;
+	  		case 3:
+	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringKey(m.getColumnLabel()), mid);
+	  				break;
+	  		case 4:
+	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].Delete(new IntegerKey(m.getTimeStamp()), mid);
+	  				break;
+	  		case 5:
+	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].Delete(new IntegerKey(m.getTimeStamp()), mid);
+	  				break;
+	  	}
+	  	
+	  	/*if(true){
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
+	  	}*/
+	  	
+
+	}catch (Exception e) {
+		System.err.println("***** Error while deleting Map from index insertMapIndex() *******");
       	e.printStackTrace();
       	Runtime.getRuntime().exit(1);
     }
