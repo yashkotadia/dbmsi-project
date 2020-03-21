@@ -370,6 +370,7 @@ public class BufMgr implements GlobalConst{
 	      throw new PageNotFoundException( null, "BUFMGR: INVALID_PAGE_NO");
 	    pageid.pid = frmeTable[i].pageNo.pid;
 	    
+      //if(unpinned>0 && all_pages==1) System.out.println("Pin count>0 for page no: "+frmeTable[i].pageNo.pid);
 	    
 	    Page apage = new Page(bufPool[i]);
 	    
@@ -392,6 +393,7 @@ public class BufMgr implements GlobalConst{
 	    if (unpinned != 0) 
 	      throw new PagePinnedException (null, "BUFMGR: PAGE_PINNED.");
 	  }
+    //unpinned = 0; //Done for calculating pagewise pin count instead of total
 	}
       
       if (all_pages != 0) {
@@ -490,7 +492,7 @@ public class BufMgr implements GlobalConst{
 	   PagePinnedException, 
 	   BufMgrException,
 	   IOException
-    { 
+    { //if(pin_pgid.pid==4 || pin_pgid.pid==194) System.out.println("Pinning Page: "+pin_pgid);
       int     frameNo;
       boolean bst, bst2; 
       PageId  oldpageNo = new PageId(-1);
@@ -594,7 +596,7 @@ public class BufMgr implements GlobalConst{
 	   HashEntryNotFoundException, 
 	   InvalidFrameNumberException
     {
-      
+      //if(PageId_in_a_DB.pid==4 || PageId_in_a_DB.pid==194)System.out.println("Unpinning Page: "+PageId_in_a_DB);
       int frameNo;
       
       frameNo=hashTable.lookup(PageId_in_a_DB);
@@ -872,3 +874,4 @@ class victim_data {
   public int page_id;
    
 }
+
