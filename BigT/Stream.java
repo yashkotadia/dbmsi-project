@@ -20,26 +20,10 @@ import iterator.*;
  */
 public class Stream implements GlobalConst{
 
-    private static int SORTPGNUM = 12;
+    private static int SORTPGNUM = 100;
     private Sort sort;
-
-    private void tempFuncPrint() {
-        try
-        {
-            Map rMap;
-            while (true) {
-                if ((rMap = sort.get_next()) == null)
-                    break;
-
-                System.out.println(rMap.getRowLabel() + " " + rMap.getColumnLabel() + " " + rMap.getTimeStamp() + " " + rMap.getValue());
-            }
-        }
-        catch(Exception e)
-        {
-            System.err.println("*** Error in Stream get_Next ***");
-            e.printStackTrace();
-        }
-    }
+    private Iterator scan=null;
+    private int type;
 
     /**
      *
@@ -48,7 +32,7 @@ public class Stream implements GlobalConst{
      *        * · 2, then results are ﬁrst ordered in column label, then row label, then time stamp
      *        * · 3, then results are ﬁrst ordered in row label, then time stamp
      *        * · 4, then results are ﬁrst ordered in column label, then time stamp
-     *        * · 6, then results are ordered in time stamp
+     *        * · 5, then results are ordered in time stamp
      *
      *  The constructor
      * @exception InvalidMapSizeException Invalid map size
@@ -65,241 +49,187 @@ public class Stream implements GlobalConst{
       TupleOrder[] order = new TupleOrder[2];
       order[0] = new TupleOrder(TupleOrder.Ascending);
       order[1] = new TupleOrder(TupleOrder.Descending);
+      type = SystemDefs.JavabaseDB.type;
 
-      switch(SystemDefs.JavabaseDB.type)
-      {
+      boolean rowAll = rowFilter.equals("*");
+      boolean columnAll = columnFilter.equals("*");
+      boolean valueAll = valueFilter.equals("*");
 
-          case 1: //No Index
-          {
-              try{
-                  FileScan fscan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
+      CondExpr[] expr;
+      try{
+        if(type==2 && !rowAll){
 
-                  sort = new Sort(order[0], fscan, SORTPGNUM, orderType, mapSize);
+        expr = getCondExpr(rowFilter);
+        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_index", rowFilter, columnFilter, valueFilter, expr);
 
-              }catch(Exception e){
-                  System.err.println("*** Error in Stream Case 1 ***");
-                  e.printStackTrace();
-                  Runtime.getRuntime().exit(1);
-              }
+      } else if(type==3 && !columnAll){
 
-          }
-          break;
+        expr = getCondExpr(columnFilter);
+        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_index", rowFilter, columnFilter, valueFilter, expr);
 
-          case 2: //index row labels
-          {
-              try {
-                  CondExpr[] expr;
-                  switch (orderType)
-                  {
-                      case 1:
-                      case 3:
-                      {
-                          expr = GetConditionalExpression(rowFilter, 2);
+      } else if(type==4 && !columnAll){
 
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "row_index", rowFilter, columnFilter, valueFilter, expr);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
+        if(columnFilter.charAt(0)=='[' && !rowAll){
+          expr = getCondExpr(columnFilter, "*");
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_row_index", rowFilter, columnFilter, valueFilter, expr);
+        } else {
+          expr = getCondExpr(columnFilter, rowFilter);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_row_index", rowFilter, columnFilter, valueFilter, expr);
+        }
 
-                          break;
-                      }
+      } else if(type==5 && !rowAll){
 
-                      case 2:
-                      case 4:
-                      case 5:
-                      {
-                          //************* WILL Using INDEX Scan help in improving perf? ************
-                          FileScan fscan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
-                          sort = new Sort(order[0], fscan, SORTPGNUM, orderType, mapSize);
-                          break;
-                      }
-                  }
-              }
-              catch(Exception e){
-                  System.err.println("*** Error in Stream Case 2 ***");
-                  e.printStackTrace();
-                  Runtime.getRuntime().exit(1);
-              }
-          }
-          break;
+        if(rowFilter.charAt(0)=='[' && !valueAll){
+          expr = getCondExpr(rowFilter, "*");
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_value_index", rowFilter, columnFilter, valueFilter, expr);
+        } else {
+          expr = getCondExpr(rowFilter, valueFilter);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_value_index", rowFilter, columnFilter, valueFilter, expr);
+        }
 
-          case 3: //index column labels
-          {
-              try {
-                  CondExpr[] expr;
-                  switch (orderType)
-                  {
-                      case 2:
-                      case 4:
-                      {
-                          expr = GetConditionalExpression(columnFilter, 3);
+      } else {
 
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "column_index", rowFilter, columnFilter, valueFilter, expr);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
-
-                          break;
-                      }
-
-                      case 1:
-                      case 3:
-                      case 5:
-                      {
-                          FileScan fscan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
-                          sort = new Sort(order[0], fscan, SORTPGNUM, orderType, mapSize);
-                          break;
-                      }
-                  }
-              }
-              catch(Exception e){
-                  System.err.println("*** Error in Stream Case 3 ***");
-                  e.printStackTrace();
-                  Runtime.getRuntime().exit(1);
-              }
-
-          }
-          break;
-
-          case 4: //index column+row labels and  index timestamps
-          {
-              try
-              {
-                  CondExpr[] expr;
-                  switch (orderType)
-                  {
-                      case 1:
-                      case 3:
-                      {
-                          FileScan fscan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
-                          sort = new Sort(order[0], fscan, SORTPGNUM, orderType, mapSize);
-                          break;
-                      }
-                      case 2:
-                      case 4:
-                      {
-                          expr = GetConditionalExpression(columnFilter, 4);
-
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "column_row_index", rowFilter, columnFilter, valueFilter, expr);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
-
-                          break;
-                      }
-                      case 5:
-                      {
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "timestamp_index", rowFilter, columnFilter, valueFilter, null);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
-
-                          break;
-                      }
-                  }
-              }
-              catch(Exception e){
-                  System.err.println("*** Error in Stream Case 4 ***");
-                  e.printStackTrace();
-                  Runtime.getRuntime().exit(1);
-              }
-          }
-          break;
-
-
-          case 5: // index row+value labels and index timestamps
-          {
-              try
-              {
-                  CondExpr[] expr;
-                  switch (orderType)
-                  {
-                      case 1:
-                      case 3:
-                      {
-                          //This might become expensive depending on the dataset.
-                          expr = GetConditionalExpression(rowFilter, 5);
-
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "row_value_index", rowFilter, columnFilter, valueFilter, expr);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
-
-                          break;
-                      }
-                      case 2:
-                      case 4:
-                      {
-                          FileScan fscan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
-                          sort = new Sort(order[0], fscan, SORTPGNUM, orderType, mapSize);
-                          break;
-                      }
-
-                      case 5:
-                      {
-                          IndexScan iscan = new IndexScan(new IndexType(IndexType.B_Index), bt.get_fileName(), "timestamp_index", rowFilter, columnFilter, valueFilter, null);
-                          sort = new Sort(order[0], iscan, SORTPGNUM, orderType, mapSize);
-
-                          break;
-                      }
-                  }
-              }
-              catch(Exception e){
-                  System.err.println("*** Error in Stream Case 5 ***");
-                  e.printStackTrace();
-                  Runtime.getRuntime().exit(1);
-              }
-          }
-          break;
+        scan = new FileScan(bt.get_fileName(), rowFilter, columnFilter, valueFilter);
 
       }
 
+      sort = new Sort(order[0], scan, SORTPGNUM, orderType, mapSize);
+    } catch(Exception e){
+      e.printStackTrace();
+      Runtime.getRuntime().exit(1);
+    }
+      
   }
 
+  /**
+   * Creates the condition expression required for index scan
+   * Generates appropriate expression based on equality search or range search
+   * @param filter based on which the condition expression is to be created
+   */
+  private CondExpr[] getCondExpr(String filter) {
+    CondExpr[] expr = new CondExpr[2];
 
-    private CondExpr[] GetConditionalExpression(String filter, int dbType) {
+    if (filter.charAt(0) == '[')
+    {
+      // RangeSearch
+      String[] fAttributes = filter.split(",");
+      expr = new CondExpr[3];
+      expr[0] = new CondExpr();
+      expr[0].op = new AttrOperator(AttrOperator.aopGE);
+      expr[0].type1 = new AttrType(AttrType.attrSymbol);
+      expr[0].type2 = new AttrType(AttrType.attrString);
+      expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+      expr[0].operand2.string = fAttributes[0].substring(1);
+      expr[0].next = null;
+      expr[1] = new CondExpr();
+      expr[1].op = new AttrOperator(AttrOperator.aopLE);
+      expr[1].type1 = new AttrType(AttrType.attrSymbol);
+      expr[1].type2 = new AttrType(AttrType.attrString);
+      expr[1].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+      expr[1].operand2.string = fAttributes[1].substring(0,fAttributes[1].length() - 1);
+      expr[1].next = null;
+      expr[2] = null;
+    }
+    else //Equality Search
+    {
+      expr = new CondExpr[2];
+      expr[0] = new CondExpr();
+      expr[0].op = new AttrOperator(AttrOperator.aopEQ);
+      expr[0].type1 = new AttrType(AttrType.attrSymbol);
+      expr[0].type2 = new AttrType(AttrType.attrString);
+      expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+      expr[0].operand2.string = filter;
+      expr[0].next = null;
+      expr[1] = null;
+    }
+    return expr;
+  }
 
-        CondExpr[] expr = null;
-        if (filter.equals("*"))
-            expr = null;
-        else if (filter.charAt(0) == '[')
-        {
-            // RangeSearch
-            String[ ] fAttributes = filter.split(",");
-            expr = new CondExpr[3];
-            expr[0] = new CondExpr();
-            expr[0].op = new AttrOperator(AttrOperator.aopGE);
-            expr[0].type1 = new AttrType(AttrType.attrSymbol);
-            expr[0].type2 = new AttrType(AttrType.attrString);
-            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
-            expr[0].operand2.string = fAttributes[0].substring(1);
-            expr[0].next = null;
-            expr[1] = new CondExpr();
-            expr[1].op = new AttrOperator(AttrOperator.aopLE);
-            expr[1].type1 = new AttrType(AttrType.attrSymbol);
-            expr[1].type2 = new AttrType(AttrType.attrString);
-            expr[1].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
-            expr[1].operand2.string = fAttributes[1].substring(0,fAttributes[1].length() - 1);
-            expr[1].next = null;
-            expr[2] = null;
+  /**
+   * Creates the condition expression required for index scan
+   * @param filter1 based on which the condition expression is to be created (range/equality)
+   * @param filter2 based on which the condition expression is to be created (range/equality/*)
+   */
+  private CondExpr[] getCondExpr(String filter1, String filter2) {
+    CondExpr[] expr = new CondExpr[3];
+    String[] ge = new String[2];
+    String[] le = new String[2];
 
-            if (dbType == 4 || dbType == 5)
-            {
-                expr[0].type2 = new AttrType(AttrType.attrStringString);
-                expr[1].type2 = new AttrType(AttrType.attrStringString);
-            }
-        }
-        else //Equality Search
-        {
-            expr = new CondExpr[2];
-            expr[0] = new CondExpr();
-            expr[0].op = new AttrOperator(AttrOperator.aopEQ);
-            expr[0].type1 = new AttrType(AttrType.attrSymbol);
-            expr[0].type2 = new AttrType(AttrType.attrString);
-            expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
-            expr[0].operand2.string = filter;
-            expr[0].next = null;
-            expr[1] = null;
+    // If filter 1 is range and filter 2 is *
+    if(filter1.charAt(0) == '['){
 
-            if (dbType == 4 || dbType == 5)
-                expr[0].type2 = new AttrType(AttrType.attrStringString);
+      if(filter2.equals("*")){
+      String[] fAttributes = filter1.split(",");
+      
+      char[] c = new char[1];
+      c[0] = Character.MIN_VALUE;
+      ge[0] = fAttributes[0].substring(1); 
+      ge[1] = new String(c);
+      
+      
+      char[] d = new char[1];
+      d[0] = Character.MAX_VALUE;
+      le[0] = fAttributes[1].substring(0,fAttributes[1].length() - 1); 
+      le[1] = new String(d);
+      }
+      
+    } 
+    // If filter 1 is equality then multiple cases are possible
+    else{
 
-        }
-        return expr;
+      // Filter 2 is *
+      if(filter2.equals("*")){
+        char[] c = new char[1];
+        c[0] = Character.MIN_VALUE;
+        ge[0] = filter1;
+        ge[1] = new String(c);
+        
+        char[] d = new char[1];
+        d[0] = Character.MAX_VALUE;
+        le[0] = filter1; 
+        le[1] = new String(d);
+      }
+
+      // filter 2 is range
+      else if(filter2.charAt(0) == '['){
+        String[] fAttributes = filter2.split(",");
+
+        ge[0] = filter1;
+        ge[1] = fAttributes[0].substring(1);
+        
+        le[0] = filter1; 
+        le[1] = fAttributes[1].substring(0,fAttributes[1].length() - 1); 
+      }
+
+      //filter 2 is equality
+      else{
+        ge[0] = filter1;
+        ge[1] = filter2;
+        
+        le[0] = filter1; 
+        le[1] = filter2;
+      }
     }
 
+    expr = new CondExpr[3];
+    expr[0] = new CondExpr();
+    expr[0].op = new AttrOperator(AttrOperator.aopGE);
+    expr[0].type1 = new AttrType(AttrType.attrSymbol);
+    expr[0].type2 = new AttrType(AttrType.attrStringString);
+    expr[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+    expr[0].operand2.stringstring = ge;
+    expr[0].next = null;
+    expr[1] = new CondExpr();
+    expr[1].op = new AttrOperator(AttrOperator.aopLE);
+    expr[1].type1 = new AttrType(AttrType.attrSymbol);
+    expr[1].type2 = new AttrType(AttrType.attrStringString);
+    expr[1].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+    expr[1].operand2.stringstring = le;
+    expr[1].next = null;
+    expr[2] = null;
 
-
+    return expr;
+  }
 
     /** Retrieve the next map in a sequential Stream
    *
@@ -325,19 +255,21 @@ public class Stream implements GlobalConst{
   }
 
 
+  /**
+   *  Safely closes a stream object by closing the sort object
+   */
+  public void closestream()
+  {
+      try
+      {
+          sort.close();
+      }
+      catch (Exception e)
+      {
+          System.err.println("*** Error in closing stream ***");
+          e.printStackTrace();
+          Runtime.getRuntime().exit(1);
+      }
 
-    public void closestream()
-    {
-        try
-        {
-            sort.close();
-        }
-        catch (Exception e)
-        {
-            System.err.println("*** Error in closing stream ***");
-            e.printStackTrace();
-            Runtime.getRuntime().exit(1);
-        }
-
-    }
+  }
  }
