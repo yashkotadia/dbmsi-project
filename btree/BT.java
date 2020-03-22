@@ -45,7 +45,7 @@ public class BT  implements GlobalConst{
    *@return return negative if key1 less than key2; positive if key1 bigger
    * than  key2; 
    * 0 if key1=key2.
-   *@exception  KeyNotMatchException key is not IntegerKey or StringKey class
+   *@exception  KeyNotMatchException key is not IntegerKey or StringKey class or StringStringKey class
    */  
   public final static int keyCompare(KeyClass key1, KeyClass key2)
     throws KeyNotMatchException
@@ -82,7 +82,7 @@ public class BT  implements GlobalConst{
    *@param key  specify the key whose length will be calculated.
    * Input parameter.
    *@return return the length of the key
-   *@exception  KeyNotMatchException  key is neither StringKey nor  IntegerKey 
+   *@exception  KeyNotMatchException  key is not IntegerKey or StringKey class or StringStringKey class
    *@exception IOException   error  from the lower layer  
    */  
   protected final static int getKeyLength(KeyClass key) 
@@ -113,7 +113,7 @@ public class BT  implements GlobalConst{
   
   /** It gets the length of the data 
    *@param  pageType  NodeType.LEAF or  NodeType.INDEX. Input parameter.
-   *@return return 8 if it is of NodeType.LEA; 
+   *@return return 8 if it is of NodeType.LEAF;
    *  return 4 if it is of NodeType.INDEX.
    *@exception  NodeNotMatchException pageType is neither NodeType.LEAF 
    *  nor NodeType.INDEX.
@@ -132,7 +132,7 @@ public class BT  implements GlobalConst{
    *@param  key    an object of KeyClass.  Input parameter.
    *@param  pageType  NodeType.LEAF or  NodeType.INDEX. Input parameter.
    *@return return the lenrth of the (key,data) pair.
-   *@exception  KeyNotMatchException key is neither StringKey nor  IntegerKey 
+   *@exception  KeyNotMatchException key is not IntegerKey or StringKey class or StringStringKey class
    *@exception NodeNotMatchException pageType is neither NodeType.LEAF 
    *  nor NodeType.INDEX.
    *@exception IOException  error from the lower layer 
@@ -150,14 +150,14 @@ public class BT  implements GlobalConst{
    * Input parameter.
    *@param offset the offset in the bytes. Input parameter.
    *@param keyType It specifies the type of key. It can be 
-   *               AttrType.attrString or AttrType.attrInteger.
+   *               AttrType.attrString, AttrType.attrInteger or AttrType.attrStringString.
    *               Input parameter. 
    *@param nodeType It specifes NodeType.LEAF or NodeType.INDEX. 
    *                Input parameter.
    *@param length  The length of (key, data) in byte array "from".
    *               Input parameter.
    *@return return a KeyDataEntry object
-   *@exception KeyNotMatchException  key is neither StringKey nor  IntegerKey
+   *@exception KeyNotMatchException
    *@exception NodeNotMatchException  nodeType is neither NodeType.LEAF 
    *  nor NodeType.INDEX.
    *@exception ConvertException  error from the lower layer 
@@ -216,7 +216,7 @@ public class BT  implements GlobalConst{
   /** It convert a keyDataEntry to byte[].
    *@param  entry specify  the data entry. Input parameter.
    *@return return a byte array with size equal to the size of (key,data). 
-   *@exception   KeyNotMatchException  entry.key is neither StringKey nor  IntegerKey
+   *@exception   KeyNotMatchException  entry.key is not IntegerKey or StringKey class or StringStringKey class
    *@exception NodeNotMatchException entry.data is neither LeafData nor IndexData
    *@exception ConvertException error from the lower layer
    */
@@ -276,7 +276,7 @@ public class BT  implements GlobalConst{
    * or BTLeafPage. 
    *@param pageno the number of page. Input parameter.
    *@param keyType It specifies the type of key. It can be 
-   *               AttrType.attrString or AttrType.attrInteger.
+   *               AttrType.attrString or AttrType.attrInteger or AttrType.attrStringString.
    *               Input parameter. 
    *@exception IOException error from the lower layer
    *@exception IteratorException  error for iterator

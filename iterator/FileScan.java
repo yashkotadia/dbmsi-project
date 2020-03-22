@@ -12,7 +12,7 @@ import java.io.*;
 
 /**
  *open a heapfile and according to the condition expression to get
- *output file, call get_next to get all tuples
+ *output file, call get_next to get all maps
  */
 public class FileScan extends  Iterator
 {
@@ -39,13 +39,10 @@ public class FileScan extends  Iterator
 
   /**
    *constructor
-   *@param file_name heapfile to be opened
-   *@param in1[]  array showing what the attributes of the input fields are. 
-   *@param s1_sizes[]  shows the length of the string fields.
-   *@param len_in1  number of attributes in the input tuple
-   *@param n_out_flds  number of fields in the out tuple
-   *@param proj_list  shows what input fields go where in the output tuple
-   *@param outFilter  select expressions
+   *@param file_name bigT to be opened
+   * @param rFilter Row Filter
+   * @param cFilter Column Filter
+   * @param vFilter Value Filter
    *@exception IOException some I/O fault
    *@exception FileScanException exception from this class
    *@exception MapUtilsException exception from this class
@@ -115,14 +112,9 @@ public class FileScan extends  Iterator
   
   /**
    *@return the result tuple
-   *@exception JoinsException some join exception
    *@exception IOException I/O errors
    *@exception InvalidTupleSizeException invalid tuple size
-   *@exception InvalidTypeException tuple type not valid
    *@exception PageNotReadException exception from lower layer
-   *@exception PredEvalException exception from PredEval class
-   *@exception UnknowAttrType attribute type unknown
-   *@exception FieldNumberOutOfBoundException array out of bounds
    *@exception WrongPermat exception for wrong FldSpec argument
    */
   public Map get_next()

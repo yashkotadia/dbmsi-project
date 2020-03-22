@@ -24,7 +24,7 @@ public class SpoofIbuf implements GlobalConst  {
    *Initialize some necessary information, call Iobuf to create the
    *object, and call init to finish instantiation
    *@param fd the reference to a bigT
-   *@param bufs[][] the I/O buffer
+   *@param bufs the I/O buffer
    *@param n_pages the numbers of page of this buffer
    *@param mSize the map size
    *@param Nmaps the map numbers of the page
