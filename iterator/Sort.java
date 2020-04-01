@@ -769,6 +769,7 @@ public class Sort extends Iterator implements GlobalConst
 
     for(SpoofIbuf spoofIbuf : i_buf){
       spoofIbuf.close();
+      //System.out.println("Closed I Buf");
     }
       
       for (int i = 0; i<temp_files.length; i++) {
