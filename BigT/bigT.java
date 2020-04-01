@@ -478,7 +478,7 @@ public class bigT implements Filetype,  GlobalConst {
    *
    * @return the mid of the map
    */
-  public MID insertMap(byte[] mapPtr) 
+  public MID insertMap(byte[] mapPtr, boolean batch) 
     throws InvalidSlotNumberException,  
 	   InvalidTupleSizeException,
 	   SpaceNotAvailableException,
@@ -505,7 +505,7 @@ public class bigT implements Filetype,  GlobalConst {
       //System.out.println("Pinning Directory Page: bigT.insertMap()");
       pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
       
-      if(_ftype==ORDINARY){
+      if(_ftype==ORDINARY && !batch){
 	      Map scanmap = new Map(mapPtr, 0, mapLen);
 		  String rowfilter = scanmap.getRowLabel();
 		  String columnfilter = scanmap.getColumnLabel();
@@ -1195,6 +1195,10 @@ public class bigT implements Filetype,  GlobalConst {
       
       delete_file_entry( _fileName );
       //System.out.println("Successfully deleted: "+_fileName);
+      if(_ftype==ORDINARY){
+	      SystemDefs.JavabaseDB.deleteIndex();
+	      SystemDefs.JavabaseDB.initIndex();
+	  }
     }
   
   /**
