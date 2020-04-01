@@ -153,6 +153,35 @@ public class MapUtils
 								
 				return 0;
 
+			case 6:
+				// order type: row label, column label, descending time stamp
+				
+				// Compare two strings
+				
+				m1_s = m1.getRowLabel();
+				m2_s = m2.getRowLabel();
+
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, row label has matched
+				
+				m1_s = m1.getColumnLabel();
+				m2_s = m2.getColumnLabel();
+
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, column label has matched
+				
+				m1_i = m1.getTimeStamp();
+				m2_i = m2.getTimeStamp();
+
+				if (m1_i <  m2_i) return 1;
+				if (m1_i >  m2_i) return -1;
+				
+				return 0;
+
 			default:
 				throw new MapUtilsException(null, "orderType < 1 or > 5 is caught by MapUtils.java");
 		}
