@@ -49,7 +49,7 @@ public class Stream implements GlobalConst{
       TupleOrder[] order = new TupleOrder[2];
       order[0] = new TupleOrder(TupleOrder.Ascending);
       order[1] = new TupleOrder(TupleOrder.Descending);
-      type = SystemDefs.JavabaseDB.type;
+      type = bt._itype;
 
       boolean rowAll = rowFilter.equals("*");
       boolean columnAll = columnFilter.equals("*");
@@ -236,11 +236,10 @@ public class Stream implements GlobalConst{
    * @exception InvalidMapSizeException Invalid map size
    * @exception IOException I/O errors
    *
-   * @param mid Map ID of the map
    * @return the Map of the retrieved map.
    */
 
-  public Map getNext(MID mid)
+  public Map getNext()
     throws InvalidMapSizeException,
 	   IOException
   {
