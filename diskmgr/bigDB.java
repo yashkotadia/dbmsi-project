@@ -66,7 +66,7 @@ public class bigDB implements GlobalConst {
 
   /** Initialize the indices
   */
-  private void initIndex(){
+  public void initIndex(){
 
     try{
       switch(type){
@@ -193,6 +193,33 @@ public class bigDB implements GlobalConst {
     }
   }
   
+  /** Deletes all the index files
+  */
+  public void deleteIndex(){
+    try{
+      switch(type){
+
+        case 1: break;
+
+        case 2:
+        case 3: 
+              indices[0].destroyFile();
+              break;
+
+        case 4:
+        case 5:
+              indices[0].destroyFile();
+              indices[1].destroyFile();
+              break;
+
+        default: break;
+      }
+    }catch (Exception e) {
+      System.err.println("***** error closing the index ******");
+      e.printStackTrace();
+      Runtime.getRuntime().exit(1);
+    }
+  }
   
   /** Destroy the database, removing the file that stores it. 
    * @exception IOException I/O errors.
