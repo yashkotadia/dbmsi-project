@@ -1,45 +1,74 @@
 import BigT.*;
 import global.*;
-import iterator.FileScan;
-import iterator.Sort;
+import iterator.*;
 
 import java.io.*;
 import java.lang.*;
-
+import java.util.Arrays;
 
 public class query implements GlobalConst {
 
     public static void main(String[] args) {
         //Parsing arguments:
-        if (args.length != 7 || args[0] == "-h") {
+        if (args.length != 6 || args[0] == "-h") {
             System.out.println("Enter correct arguments: \nquery BIGTABLENAME TYPE ORDERTYPE ROWFILTER COLUMNFILTER VALUEFILTER NUMBUF\n");
             return;
         }
 
-        String bigtableName = args[0], databaseType = args[1], rowfilter = args[3], columnfilter = args[4], vfilter = args[5];
-        int numbuffs = Integer.parseInt(args[6]), orderType = Integer.parseInt(args[2]);
+        String bigtableName = args[0], rowfilter = args[2], columnfilter = args[3], vfilter = args[4];
+        int numbuffs = Integer.parseInt(args[5]), orderType = Integer.parseInt(args[1]);
 
-        String dbpath = "/tmp/" + System.getProperty("user.name") + bigtableName + "_" + databaseType;
-        SystemDefs sysdef = new SystemDefs(dbpath, 0, numbuffs, "Clock", Integer.parseInt(databaseType));
+        String dbpath = "/tmp/" + System.getProperty("user.name") + bigtableName;
+        SystemDefs sysdef = new SystemDefs(dbpath, 0, numbuffs, "Clock");
 
 
-        bigT bigTable = null;
         try {
-            bigTable = new bigT(bigtableName+"_"+databaseType);
 
-            Stream stream = bigTable.openStream(orderType,rowfilter,columnfilter,vfilter);
+            bigT[]      bigTable = new bigT[5];
+            Stream[]    stream = new Stream[5];
+            Map[]       rMap = new Map[5];
+            boolean[]   done = new boolean[5];
+
+            // Initialize all the BigTables and Streams
+            for(int i=0; i<5; i++){
+                bigTable[i] = new bigT(bigtableName+"_"+(i+1));
+                stream[i] = bigTable[i].openStream(orderType,rowfilter,columnfilter,vfilter);
+                rMap[i] = stream[i].getNext();
+                if(rMap[i]==null) done[i] = true;
+            }
             
-            MID mid = new MID();
-            Map rMap;
             while(true){
-                if((rMap   = stream.getNext(mid)) == null){
-                    break;
+                // Initialize the first null Map as minimum for further comparison
+                int minInd = 0; 
+                for(int i=0; i<5; i++){
+                    if(rMap[i]!=null){
+                        minInd = i;
+                        break;
+                    }
                 }
-                System.out.println(rMap.getRowLabel() + " " + rMap.getColumnLabel() + " " + rMap.getValue() + " " + rMap.getTimeStamp());
+
+                // Find minimum out of all streams
+                for(int i=0; i<5; i++){
+                    if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==1 ){
+                        minInd = i;
+                    }
+                }
+
+                // Print the minimum valued Map
+                Map out = rMap[minInd];
+                System.out.println(out.getRowLabel() + " " + out.getColumnLabel() + " " + out.getValue() + " " + out.getTimeStamp());
+
+                // Call stream.getNext() on the stream that we used
+                rMap[minInd] = stream[minInd].getNext();
+                if(rMap[minInd]==null) done[minInd] = true;
+
+                // Check Breaking condition
+                if(areAllTrue(done)) break;
+
             }
 
 
-            stream.close();
+            for(int i=0; i<5; i++) stream[i].close();
             sysdef.close();
         }
         catch (Exception e) {
@@ -48,6 +77,12 @@ public class query implements GlobalConst {
         }
 
 
+    }
+
+    private static boolean areAllTrue(boolean[] array)
+    {
+        for(boolean b : array) if(!b) return false;
+        return true;
     }
 
 }
