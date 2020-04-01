@@ -22,8 +22,8 @@ public class BatchInsert implements GlobalConst {
 
         String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
         int numbuffs = Integer.parseInt(args[3]);
-        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName+"_"+databaseType; 
-        SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock",  Integer.parseInt(databaseType));
+        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
+        SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock");
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
@@ -82,12 +82,11 @@ public class BatchInsert implements GlobalConst {
             }
 
             Stream stream = tempbt.openStream(6, "*", "*", "*");
-            MID mid = new MID();
             Map prevMap = null;
             Map rMap;
             int prevCount = 0;
             while(true){
-                if((rMap   = stream.getNext(mid)) == null){
+                if((rMap   = stream.getNext()) == null){
                     break;
                 }
                 if(prevMap!=null && prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()) ){
