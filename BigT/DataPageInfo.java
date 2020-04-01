@@ -19,7 +19,7 @@ class DataPageInfo implements GlobalConst{
   /** HFPage returns int for avail space, so we use int here */
   int    availspace; 
   
-  /** for efficient implementation of getMapCnt(), getRowCnt(), getColcnt() */
+  /** for efficient implementation of getMapCnt()*/
   int    mapct;
   //int rowct;
   //int colct;    
@@ -125,13 +125,13 @@ class DataPageInfo implements GlobalConst{
   }
   
     
-  /** write this object's useful fields(availspace, mapct, pageId, rowct, colct) 
+  /** write this object's useful fields(availspace, mapct, pageId) 
    *  to the data[](may be in buffer pool)
    *  
    */
   public void flushToTuple() throws IOException
   {
-     // write availspace, mapct, pageId, rowct, colct into "data[]"
+     // write availspace, mapct, pageId, into "data[]"
     Convert.setIntValue(availspace, offset, data);
     Convert.setIntValue(mapct, offset+4, data);
     Convert.setIntValue(pageId.pid, offset+8, data);
