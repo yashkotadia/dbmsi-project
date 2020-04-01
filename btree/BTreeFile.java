@@ -297,11 +297,10 @@ public class BTreeFile extends IndexFile
 	    childId = ((IndexData)(entry.data)).getData();
 	    _destroyFile(childId);
 	  }
-      } else { // BTLeafPage 
-	
-	unpinPage(pageno);
-	freePage(pageno);
       }
+
+      unpinPage(pageno);
+      freePage(pageno);
       
     }
   
