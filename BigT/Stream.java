@@ -258,7 +258,7 @@ public class Stream implements GlobalConst{
   /**
    *  Safely closes a stream object by closing the sort object
    */
-  public void closestream()
+  public void close()
   {
       try
       {
