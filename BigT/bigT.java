@@ -56,6 +56,7 @@ public class bigT implements Filetype,  GlobalConst {
   
   PageId      _firstDirPageId;   // page number of header page
   int         _ftype;
+  int 	 	  _itype = 0;		//Index Type of the BigTable
   private     boolean     _file_deleted;
   private     String 	 _fileName;
   private static int tempfilecount = 0;
@@ -264,7 +265,8 @@ public class bigT implements Filetype,  GlobalConst {
       else
 	{
 	  _fileName = name;
-	  _ftype = ORDINARY;    
+	  _ftype = ORDINARY;
+	  _itype = Integer.parseInt(name.substring(name.length()-1));    
 	}
       
       // The constructor gets run in two different cases.
@@ -517,7 +519,7 @@ public class bigT implements Filetype,  GlobalConst {
 		  Iterator scan = null;
 		  CondExpr[] expr = new CondExpr[2];
 
-		  switch(SystemDefs.JavabaseDB.type){
+		  switch(_itype){
 
 		  	default:
 		  		//System.out.println("Opened File Scan");
@@ -1196,8 +1198,9 @@ public class bigT implements Filetype,  GlobalConst {
       delete_file_entry( _fileName );
       //System.out.println("Successfully deleted: "+_fileName);
       if(_ftype==ORDINARY){
-	      SystemDefs.JavabaseDB.deleteIndex();
-	      SystemDefs.JavabaseDB.initIndex();
+      	  SystemDefs.JavabaseDB.initIndex(_itype);
+	      SystemDefs.JavabaseDB.deleteIndex(_itype);
+	      SystemDefs.JavabaseDB.initIndex(_itype);
 	  }
     }
   
@@ -1310,28 +1313,27 @@ public class bigT implements Filetype,  GlobalConst {
   	Map m = new Map(mapPtr, 0, mapPtr.length);
 
   	try{
-	  	switch(SystemDefs.JavabaseDB.type){
+  		SystemDefs.JavabaseDB.initIndex(_itype);
+	  	switch(_itype){
 	  		default: break;
 
 	  		case 2:
 	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getRowLabel()), mid);
 	  				break;
 	  		case 3:
-	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getColumnLabel()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].insert(new StringKey(m.getColumnLabel()), mid);
 	  				break;
 	  		case 4:
-	  				SystemDefs.JavabaseDB.indices[0].insert(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
-	  				SystemDefs.JavabaseDB.indices[1].insert(new IntegerKey(m.getTimeStamp()), mid);
+	  				SystemDefs.JavabaseDB.indices[2].insert(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
 	  				break;
 	  		case 5:
-	  				SystemDefs.JavabaseDB.indices[0].insert(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
-	  				SystemDefs.JavabaseDB.indices[1].insert(new IntegerKey(m.getTimeStamp()), mid);
+	  				SystemDefs.JavabaseDB.indices[3].insert(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
 	  				break;
 	  	}
+	  	SystemDefs.JavabaseDB.closeIndex(_itype);
 	  	/*
 	  	if(true){
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[_itype-2].getHeaderPage());
 	  	}*/
 	  	
 
@@ -1350,28 +1352,25 @@ public class bigT implements Filetype,  GlobalConst {
   private void deleteMapIndex(Map m, MID mid){
 
   	try{
-	  	switch(SystemDefs.JavabaseDB.type){
+  		SystemDefs.JavabaseDB.initIndex(_itype);
+	  	switch(_itype){
 	  		default: break;
 
 	  		case 2:
 	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringKey(m.getRowLabel()), mid);
 	  				break;
 	  		case 3:
-	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringKey(m.getColumnLabel()), mid);
+	  				SystemDefs.JavabaseDB.indices[1].Delete(new StringKey(m.getColumnLabel()), mid);
 	  				break;
 	  		case 4:
-	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
-	  				SystemDefs.JavabaseDB.indices[1].Delete(new IntegerKey(m.getTimeStamp()), mid);
+	  				SystemDefs.JavabaseDB.indices[2].Delete(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
 	  				break;
 	  		case 5:
-	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
-	  				SystemDefs.JavabaseDB.indices[1].Delete(new IntegerKey(m.getTimeStamp()), mid);
-	  				break;
+	  				SystemDefs.JavabaseDB.indices[3].Delete(new StringStringKey(m.getRowLabel(), m.getValue()), mid);	  				break;
 	  	}
-	  	
+	  	SystemDefs.JavabaseDB.closeIndex(_itype);
 	  	/*if(true){
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[0].getHeaderPage());
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[1].getHeaderPage());
+	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[_itype-2].getHeaderPage());
 	  	}*/
 	  	
 
