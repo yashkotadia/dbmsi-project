@@ -360,8 +360,10 @@ public class BufMgr implements GlobalConst{
       for (i=0; i < numBuffers; i++)   // write all valid dirty pages to disk
 	if ( (all_pages !=0) || (frmeTable[i].pageNo.pid == pageid.pid)) {
 	  
-	  if ( frmeTable[i].pin_count() != 0 )
+	  if ( frmeTable[i].pin_count() != 0 ){
 	    unpinned++;
+      //if(unpinned>0 && all_pages==1) System.out.println("Pin count>0 for page no: "+frmeTable[i].pageNo.pid);
+    }
 	  
 	  if ( frmeTable[i].dirty != false ) {
 	    
@@ -369,8 +371,6 @@ public class BufMgr implements GlobalConst{
 	      
 	      throw new PageNotFoundException( null, "BUFMGR: INVALID_PAGE_NO");
 	    pageid.pid = frmeTable[i].pageNo.pid;
-	    
-      //if(unpinned>0 && all_pages==1) System.out.println("Pin count>0 for page no: "+frmeTable[i].pageNo.pid);
 	    
 	    Page apage = new Page(bufPool[i]);
 	    
