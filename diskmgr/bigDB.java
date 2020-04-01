@@ -12,8 +12,7 @@ public class bigDB implements GlobalConst {
 
   
   private static final int bits_per_page = MAX_SPACE * 8;
-  public int type;
-  public BTreeFile[] indices = new BTreeFile[2];
+  public BTreeFile[] indices = new BTreeFile[4];
   
   
   /** Open the database with the given name.
@@ -51,22 +50,18 @@ public class bigDB implements GlobalConst {
     //System.out.println(Arrays.toString(firstpg.data));
     
     unpinPage(pageId, false /* undirty*/);
-    initIndex();
   }
   
   /** default constructor.
-   *  @param bigDBtype specifies the type of bigDB indexing scheme to be used
    */
-  public bigDB(int bigDBtype){
-
-    type = bigDBtype;
+  public bigDB(){
 
   }
 
 
   /** Initialize the indices
   */
-  public void initIndex(){
+  public void initIndex(int type){
 
     try{
       switch(type){
@@ -78,20 +73,16 @@ public class bigDB implements GlobalConst {
               break;
 
         case 3:
-              indices[0] = new BTreeFile("column_index", AttrType.attrString, COLUMN_LABEL_SIZE, 0);
+              indices[1] = new BTreeFile("column_index", AttrType.attrString, COLUMN_LABEL_SIZE, 0);
               break;
 
         case 4:
-              indices[0] = new BTreeFile("column_row_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
-              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 0);
+              indices[2] = new BTreeFile("column_row_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
               break;
 
         case 5:
-              indices[0] = new BTreeFile("row_value_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
-              indices[1] = new BTreeFile("timestamp_index", AttrType.attrInteger, 4, 0);
+              indices[3] = new BTreeFile("row_value_index", AttrType.attrStringString, 2*COLUMN_LABEL_SIZE, 0);
               break;
-
-        default: break;
       }
     }catch (Exception e) {
       System.err.println("***** error initializing the index ******");
@@ -152,8 +143,11 @@ public class bigDB implements GlobalConst {
     int num_map_pages = (num_pages + bits_per_page -1)/bits_per_page;
     
     set_bits(pageId, 1+num_map_pages, 1);
-    
-    initIndex();
+
+    for(int i=1; i<=5; i++){
+      initIndex(i);
+      closeIndex(i);
+    }
   }
   
   /** Close DB file.
@@ -167,24 +161,15 @@ public class bigDB implements GlobalConst {
 
   /** Closes all the index files
   */
-  public void closeIndex(){
+  public void closeIndex(int type){
     try{
       switch(type){
 
         case 1: break;
-
-        case 2:
-        case 3: 
-              indices[0].close();
-              break;
-
-        case 4:
-        case 5:
-              indices[0].close();
-              indices[1].close();
-              break;
-
-        default: break;
+        case 2: indices[0].close(); break;
+        case 3: indices[1].close(); break;
+        case 4: indices[2].close(); break;
+        case 5: indices[3].close(); break;
       }
     }catch (Exception e) {
       System.err.println("***** error closing the index ******");
@@ -195,27 +180,18 @@ public class bigDB implements GlobalConst {
   
   /** Deletes all the index files
   */
-  public void deleteIndex(){
+  public void deleteIndex(int type){
     try{
       switch(type){
 
         case 1: break;
-
-        case 2:
-        case 3: 
-              indices[0].destroyFile();
-              break;
-
-        case 4:
-        case 5:
-              indices[0].destroyFile();
-              indices[1].destroyFile();
-              break;
-
-        default: break;
+        case 2: indices[0].destroyFile(); break;
+        case 3: indices[1].destroyFile(); break;
+        case 4: indices[2].destroyFile(); break;
+        case 5: indices[3].destroyFile(); break;
       }
     }catch (Exception e) {
-      System.err.println("***** error closing the index ******");
+      System.err.println("***** error deleting the index ******");
       e.printStackTrace();
       Runtime.getRuntime().exit(1);
     }
