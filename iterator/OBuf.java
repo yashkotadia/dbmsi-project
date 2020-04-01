@@ -109,7 +109,7 @@ public class OBuf implements GlobalConst{
 		  {
 		    System.arraycopy(_bufs[count],m_size*i,tempbuf,0,m_size);
 		    try {
-		      mid =  _temp_fd.insertMap(tempbuf);
+		      mid =  _temp_fd.insertMap(tempbuf, false);
 		    }
 		    catch (Exception e){
 		      throw e;
@@ -120,7 +120,7 @@ public class OBuf implements GlobalConst{
 		  {       
 		    System.arraycopy(_bufs[count],m_size*i,tempbuf,0,m_size);
 		    try {
-		      mid =  _temp_fd.insertMap(tempbuf);
+		      mid =  _temp_fd.insertMap(tempbuf, false);
 		    }
 		    catch (Exception e){
 		      throw e;
