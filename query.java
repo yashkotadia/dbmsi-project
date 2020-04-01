@@ -35,11 +35,11 @@ public class query implements GlobalConst {
                 if((rMap   = stream.getNext(mid)) == null){
                     break;
                 }
-                System.out.println(rMap.getRowLabel() + " " + rMap.getColumnLabel() + " " + rMap.getTimeStamp() + " " + rMap.getValue());
+                System.out.println(rMap.getRowLabel() + " " + rMap.getColumnLabel() + " " + rMap.getValue() + " " + rMap.getTimeStamp());
             }
 
 
-            stream.closestream();
+            stream.close();
             sysdef.close();
         }
         catch (Exception e) {
