@@ -10,7 +10,8 @@ import java.util.Arrays;
 
 /** 
  * A BigStream object provides the similar getNext interface like Stream
- * However, it combines 5 sorted-streams of different BigTable Maps stored in different index types
+ * However, it combines n sorted-streams of different BigTables
+ * Mainly it is used for combining streams from 5 index types
  */
 public class BigStream{
 
@@ -19,7 +20,7 @@ public class BigStream{
     Map[]       rMap;
     boolean[]   done;
     int 		orderType;
-    int         outInd = 0;
+    public int   outInd = 0;
     int         nStreams;
 
     /** Opens the bigtables and their streams
@@ -87,7 +88,7 @@ public class BigStream{
 
 	}
 
-    /** Closes all the 5 streams
+    /** Closes all the streams
     */
 	public void close(){
 		for(int i=0; i<nStreams; i++) stream[i].close();
