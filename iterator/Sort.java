@@ -37,7 +37,6 @@ public class Sort extends Iterator implements GlobalConst
   private Iterator    _am;
   private int         _n_pages;
   private byte[][]    bufs;
-  private boolean     first_time;
   private int         Nruns;
   private int         max_elems_in_heap;
   private int         map_size;
@@ -596,7 +595,9 @@ public class Sort extends Iterator implements GlobalConst
         int oType,
         int valueSize 
 
-	      ) throws IOException, SortException
+	      ) throws IOException, SortException,
+          SortException, UnknowAttrType, LowMemException, 
+          JoinsException, Exception
   {
     /*_in = new AttrType[len_in];
     n_cols = len_in;
@@ -656,9 +657,7 @@ public class Sort extends Iterator implements GlobalConst
     else {
       for (int k=0; k<_n_pages; k++) bufs[k] = new byte[MAX_SPACE];
     }
-    
-    first_time = true;
-    
+        
     // as a heuristic, we set the number of runs to an arbitrary value
     // of ARBIT_RUNS
     temp_files = new bigT[ARBIT_RUNS];
@@ -690,6 +689,20 @@ public class Sort extends Iterator implements GlobalConst
     catch (Exception e) {
       throw new SortException(e, "Sort.java: op_buf.setHdr() failed");
     }*/
+    
+    // generate runs
+    Nruns = generate_runs(max_elems_in_heap);
+    //      System.out.println("Generated " + Nruns + " runs");
+    
+    // setup state to perform merge of runs. 
+    // Open input buffers for all the input file
+    setup_for_merge(map_size, Nruns);
+    try {
+        _am.close();
+    }
+    catch (Exception e) {
+      throw new SortException(e, "Sort.java: error in closing iterator.");
+    }
   }
   
   /**
@@ -712,19 +725,7 @@ public class Sort extends Iterator implements GlobalConst
 	   JoinsException,
 	   Exception
   {
-    if (first_time) {
-      // first get_next call to the sort routine
-      first_time = false;
-      
-      // generate runs
-      Nruns = generate_runs(max_elems_in_heap);
-      //      System.out.println("Generated " + Nruns + " runs");
-      
-      // setup state to perform merge of runs. 
-      // Open input buffers for all the input file
-      setup_for_merge(map_size, Nruns);
-    }
-    
+
     if (Q.empty()) {  
       // no more maps available
       return null;
@@ -749,13 +750,6 @@ public class Sort extends Iterator implements GlobalConst
   {
     // clean up
     if (!closeFlag) {
-       
-      try {
-	_am.close();
-      }
-      catch (Exception e) {
-	throw new SortException(e, "Sort.java: error in closing iterator.");
-      }
 
       if (useBM) {
 	try {
