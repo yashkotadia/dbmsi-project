@@ -56,7 +56,7 @@ public class bigT implements Filetype,  GlobalConst {
   
   PageId      _firstDirPageId;   // page number of header page
   int         _ftype;
-  int 	 	  _itype = 0;		//Index Type of the BigTable
+  int 	 	  _itype = 1;		//Index Type of the BigTable
   private     boolean     _file_deleted;
   private     String 	 _fileName;
   private static int tempfilecount = 0;
@@ -313,95 +313,6 @@ public class bigT implements Filetype,  GlobalConst {
       //  - no datapage pinned yet    
       
     } // end of constructor 
-  
-   /** Return number of distinct rows in bigT.	
-   *	
-   * @exception InvalidSlotNumberException invalid slot number	
-   * @exception InvalidTupleSizeException invalid tuple size	
-   * @exception HFBufMgrException exception thrown from bufmgr layer	
-   * @exception HFDiskMgrException exception thrown from diskmgr layer	
-   * @exception IOException I/O errors	
-   */	
-    public int getRowCnt() throws InvalidSlotNumberException, 	
-	   InvalidTupleSizeException, 	
-	   HFDiskMgrException,	
-	   HFBufMgrException,	
-	   IOException,	
-	   FileScanException,	
-	   SortException,	
-	   MapUtilsException,	
-	   UnknowAttrType,	
-	   LowMemException,	
-	   JoinsException,	
-	   Exception{	
-	   	Map map1 = new Map();	
-	    FileScan fscan = new FileScan(_fileName,"*", "*", "*");	
-        String prevRowLabel = "";	
-        int rowct = 0;	
-        TupleOrder[] order = new TupleOrder[2];	
-        order[0] = new TupleOrder(TupleOrder.Ascending);	
-        order[1] = new TupleOrder(TupleOrder.Descending);	
-        Sort sort = new Sort(order[0], fscan, 100, 1, 80); // OrderType = 1	
-        while(true){	
-        	map1 = sort.get_next();	
-            if(map1 == null){	
-                break;	
-            }	
-            if(!(map1.getRowLabel().equals(prevRowLabel))){	
-            	rowct++;	
-            }	
-            prevRowLabel = map1.getRowLabel();	
-            	
-        }	
-        sort.close();	
-        return rowct;	
-       	
-    }	
-   
-   /** Return number of distinct columns in bigT.	
-   *	
-   * @exception InvalidSlotNumberException invalid slot number	
-   * @exception InvalidTupleSizeException invalid tuple size	
-   * @exception HFBufMgrException exception thrown from bufmgr layer	
-   * @exception HFDiskMgrException exception thrown from diskmgr layer	
-   * @exception IOException I/O errors	
-   */	
-    public int getColumnCnt() throws InvalidSlotNumberException, 	
-	   InvalidTupleSizeException, 	
-	   HFDiskMgrException,	
-	   HFBufMgrException,	
-	   IOException,	
-	   FileScanException,	
-	   SortException,	
-	   MapUtilsException,	
-	   UnknowAttrType,	
-	   LowMemException,	
-	   JoinsException,	
-	   Exception{	
-	   	Map map1 = new Map();	
-	    FileScan fscan = new FileScan(_fileName,"*", "*", "*");	
-        String prevColumnLabel = "";	
-        int colct = 0;	
-        TupleOrder[] order = new TupleOrder[2];	
-        order[0] = new TupleOrder(TupleOrder.Ascending);	
-        order[1] = new TupleOrder(TupleOrder.Descending);	
-        Sort sort = new Sort(order[0], fscan, 100, 2, 80); // Ordertype = 2	
-        while(true){	
-        	map1 = sort.get_next();	
-            if(map1 == null){	
-                break;	
-            }	
-            if(!(map1.getColumnLabel().equals(prevColumnLabel))){	
-            	//System.out.println(map1.getColumnLabel());	
-            	colct++;	
-            }	
-            prevColumnLabel = map1.getColumnLabel();	
-            	
-        }	
-        sort.close();	
-        return colct;	
-       	
-    }
 
   /** Return number of maps in bigT.
    *
@@ -480,7 +391,7 @@ public class bigT implements Filetype,  GlobalConst {
    *
    * @return the mid of the map
    */
-  public MID insertMap(byte[] mapPtr, boolean batch) 
+  public MID insertMap(byte[] mapPtr) 
     throws InvalidSlotNumberException,  
 	   InvalidTupleSizeException,
 	   SpaceNotAvailableException,
@@ -506,7 +417,7 @@ public class bigT implements Filetype,  GlobalConst {
       PageId nextDirPageId = new PageId();  // OK
       //System.out.println("Pinning Directory Page: bigT.insertMap()");
       pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
-      
+      /*
       if(_ftype==ORDINARY && !batch){
 	      Map scanmap = new Map(mapPtr, 0, mapLen);
 		  String rowfilter = scanmap.getRowLabel();
@@ -621,7 +532,7 @@ public class bigT implements Filetype,  GlobalConst {
 	          	}
 	          	if(scanmap.getTimeStamp() <= mints){
 	          		System.out.println("Inserting older map");
-	          		unpinPage(currentDirPageId, false/*clean*/);
+	          		unpinPage(currentDirPageId, false);
 	          		return null;
 	          	}
 
@@ -629,7 +540,7 @@ public class bigT implements Filetype,  GlobalConst {
 	          	deleteMap(resultmid[mintsindex]);
 	          	deleteMapIndex( resultMapArr[mintsindex], resultmid[mintsindex]);
 	      }
-	  }
+	  }*/
 
       found = false;
       Tuple atuple;
@@ -989,6 +900,8 @@ public class bigT implements Filetype,  GlobalConst {
 	      
 	    }
 	}
+	  if(_ftype==ORDINARY)
+	  	deleteMapIndex(getMap(mid), mid);
       return true;
     }
   
@@ -1197,11 +1110,6 @@ public class bigT implements Filetype,  GlobalConst {
       
       delete_file_entry( _fileName );
       //System.out.println("Successfully deleted: "+_fileName);
-      if(_ftype==ORDINARY){
-      	  SystemDefs.JavabaseDB.initIndex(_itype);
-	      SystemDefs.JavabaseDB.deleteIndex(_itype);
-	      SystemDefs.JavabaseDB.initIndex(_itype);
-	  }
     }
   
   /**
