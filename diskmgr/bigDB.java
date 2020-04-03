@@ -559,6 +559,82 @@ public class bigDB implements GlobalConst {
     unpinPage(hpid, true /* dirty*/);
     
   }
+
+  /** Rename a file entry based on the given name
+   * @param fname name of the file entry to be renamed
+   * @param newName
+   */
+  public void rename_file_entry(String fname, String newName)
+      throws FileEntryNotFoundException, 
+     IOException,
+     FileIOException,
+     InvalidPageNumberException, 
+     DiskMgrException
+  {
+
+    Page apage = new Page();
+    boolean found = false;
+    int slot = 0;
+    PageId hpid = new PageId();
+    PageId nexthpid = new PageId(0);
+    PageId tmppid = new PageId();
+    DBHeaderPage dp;
+
+    do
+      { // startDO01
+        hpid.pid = nexthpid.pid;
+  
+  // Pin the header page.
+  pinPage(hpid, apage, false/*read disk*/);
+
+  // This complication is because the first page has a different
+        // structure from that of subsequent pages.
+  if(hpid.pid==0)
+    {
+      dp = new DBFirstPage();
+      ((DBFirstPage)dp).openPage(apage);
+    }
+  else
+    {
+      dp = new DBDirectoryPage();
+      ((DBDirectoryPage) dp).openPage(apage);
+    }
+  nexthpid = dp.getNextPage();
+  
+  int entry = 0;
+  
+  String tmpname;
+  while(entry < dp.getNumOfEntries())
+    {
+      tmpname = dp.getFileEntry(tmppid, entry);
+      
+      if((tmppid.pid != INVALID_PAGE)&&
+         (tmpname.compareTo(fname) == 0)) break; 
+      entry ++;
+    }
+  
+        if(entry < dp.getNumOfEntries())
+    {
+      slot = entry;
+      found = true;
+    }
+  else
+    {
+      unpinPage(hpid, false /*undirty*/);
+    }
+  
+      } while((nexthpid.pid != INVALID_PAGE) && (!found)); // EndDO01
+    
+    if(!found)  // Entry not found - nothing renamed
+      throw new FileEntryNotFoundException(null, "DB file not found");
+    
+    // Have to rename record at hpnum:slot
+    dp.setFileEntry(tmppid, newName, slot);
+    
+    unpinPage(hpid, true /*dirty*/);
+
+  }
+
   
   /** Delete the entry corresponding to a file from the header page(s).
    *
@@ -721,7 +797,7 @@ public class bigDB implements GlobalConst {
     dp.getFileEntry(startpid, slot);
     return startpid;
   }
-  
+
   /** Functions to return some characteristics of the database.
    */
   public String db_name(){return name;}
