@@ -1,4 +1,4 @@
-import global.*;
+                                                                                                     import global.*;
 import index.*;
 import BigT.*;
 import java.io.*;
@@ -20,28 +20,25 @@ public class BatchInsert implements GlobalConst {
             return;
         }
 
-        String dataFileName = args[0], databaseType = args[1], bigtableName = args[2];
+        String dataFileName = args[0], bigtableName = args[2];
+        int databaseType = Integer.parseInt(args[1]);
         int numbuffs = Integer.parseInt(args[3]);
         String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
         SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock");
+
+        String[] streamBTNames = new String[6];
+        for(int i=0; i<5; i++) streamBTNames[i] = "old_"+(i+1);
+
         //Reading input csv file:
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
 
             String line = br.readLine();
 
-            bigT bigTable = null;
-            bigT tempbt = null;
-            
-            try {
-                bigTable = new bigT(bigtableName+"_"+databaseType);
-                tempbt = new bigT(null);
-            }
-            catch (Exception e) {
-                System.err.println("*** Error in creating/opening bigT ***");
-                e.printStackTrace();
-            }
+            bigT tempbt = new bigT(null);
+            streamBTNames[5] = tempbt.get_fileName();
 
+            // Put the new data into temporary bigT
             while (line != null) {
 
                 Map m = new Map();
@@ -65,23 +62,36 @@ public class BatchInsert implements GlobalConst {
                 line = br.readLine();
             }
 
-            if(bigTable.getMapCnt()!=0){
-                Scan scan = bigTable.openScan();
-                MID mid = new MID();
-                while(true) {
-                    Map map1 = new Map();
-                    if((map1 =  scan.getNext(mid)) == null) 
-                        break;
-                    System.out.println("Added Map TS from old to temp: " + map1.getTimeStamp());
-                    tempbt.insertMap(map1.returnMapByteArray(), true);
-                }
-                scan.closescan();
+            // Ensure that all bigTables are there before attempting renaming
+            for(int i=1; i<=5; i++) new bigT(bigtableName +"_" +i);
 
-                bigTable.deletebigT();
-                bigTable = new bigT(bigtableName+"_"+databaseType);
+            // Rename all the bigTable file entries to something else
+            for(int i=0; i<5; i++)
+                SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +(i+1), streamBTNames[i] );
+
+            // Create new Big Tables
+            bigT[] newBTs = new bigT[5];
+            for(int i=0; i<5; i++)
+                newBTs[i] = new bigT(bigtableName +"_" +(i+1));
+
+            // Initialize the stream
+            BigStream stream = new BigStream(streamBTNames, 6, "*", "*", "*");
+
+            // Reinitialize indexes
+            for(int i=1; i<=5; i++){
+                SystemDefs.JavabaseDB.initIndex(i);
+                SystemDefs.JavabaseDB.deleteIndex(i);
+                SystemDefs.JavabaseDB.initIndex(i);
+                SystemDefs.JavabaseDB.closeIndex(i);
             }
 
-            Stream stream = tempbt.openStream(6, "*", "*", "*");
+            // Delete the old big tables
+            for(int i=0; i<5; i++) {
+                bigT b = new bigT(streamBTNames[i]);
+                b.deletebigT();
+            }
+            
+            // Distribute the maps to respective big tables
             Map prevMap = null;
             Map rMap;
             int prevCount = 0;
@@ -97,7 +107,8 @@ public class BatchInsert implements GlobalConst {
                 }
                 if(prevCount<=3){
                     System.out.println("Added Map TS from temp to new: " + rMap.getTimeStamp());
-                    bigTable.insertMap(rMap.returnMapByteArray(), true);
+                    if(stream.outInd==5) newBTs[databaseType-1].insertMap(rMap.returnMapByteArray(), true);
+                    else newBTs[stream.outInd].insertMap(rMap.returnMapByteArray(), true);
                 }
             }
             stream.close();
