@@ -23,52 +23,17 @@ public class query implements GlobalConst {
 
 
         try {
+            BigStream s = new BigStream(bigtableName, orderType, rowfilter, columnfilter, vfilter);
 
-            bigT[]      bigTable = new bigT[5];
-            Stream[]    stream = new Stream[5];
-            Map[]       rMap = new Map[5];
-            boolean[]   done = new boolean[5];
-
-            // Initialize all the BigTables and Streams
-            for(int i=0; i<5; i++){
-                bigTable[i] = new bigT(bigtableName+"_"+(i+1));
-                stream[i] = bigTable[i].openStream(orderType,rowfilter,columnfilter,vfilter);
-                rMap[i] = stream[i].getNext();
-                if(rMap[i]==null) done[i] = true;
-            }
-            
             while(true){
-                // Initialize the first null Map as minimum for further comparison
-                int minInd = 0; 
-                for(int i=0; i<5; i++){
-                    if(rMap[i]!=null){
-                        minInd = i;
-                        break;
-                    }
-                }
 
-                // Find minimum out of all streams
-                for(int i=0; i<5; i++){
-                    if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==1 ){
-                        minInd = i;
-                    }
-                }
+                Map out = s.getNext();
+                if(out == null) break;
 
-                // Print the minimum valued Map
-                Map out = rMap[minInd];
                 System.out.println(out.getRowLabel() + " " + out.getColumnLabel() + " " + out.getValue() + " " + out.getTimeStamp());
-
-                // Call stream.getNext() on the stream that we used
-                rMap[minInd] = stream[minInd].getNext();
-                if(rMap[minInd]==null) done[minInd] = true;
-
-                // Check Breaking condition
-                if(areAllTrue(done)) break;
-
             }
 
-
-            for(int i=0; i<5; i++) stream[i].close();
+            s.close();
             sysdef.close();
         }
         catch (Exception e) {
@@ -77,12 +42,6 @@ public class query implements GlobalConst {
         }
 
 
-    }
-
-    private static boolean areAllTrue(boolean[] array)
-    {
-        for(boolean b : array) if(!b) return false;
-        return true;
     }
 
 }
