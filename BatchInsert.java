@@ -1,4 +1,4 @@
-                                                                                                     import global.*;
+import global.*;
 import index.*;
 import BigT.*;
 import java.io.*;
