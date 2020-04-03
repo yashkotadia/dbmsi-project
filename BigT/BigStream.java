@@ -14,24 +14,32 @@ import java.util.Arrays;
  */
 public class BigStream{
 
-	bigT[]      bigTable = new bigT[5];
-    Stream[]    stream = new Stream[5];
-    Map[]       rMap = new Map[5];
-    boolean[]   done = new boolean[5];
+	bigT[]      bigTable;
+    Stream[]    stream;
+    Map[]       rMap;
+    boolean[]   done;
     int 		orderType;
+    int         outInd = 0;
+    int         nStreams;
 
     /** Opens the bigtables and their streams
     */
-	public BigStream(String bigtableName, int orderType, String rowFilter, String columnFilter, String valueFilter)
+	public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter)
 		throws HFException, InvalidTupleSizeException,
 				InvalidMapSizeException, IOException,
 				HFBufMgrException, HFDiskMgrException{
 
 		this.orderType = orderType;
+        nStreams = bigtableNames.length;
+
+        bigTable = new bigT[nStreams];
+        stream = new Stream[nStreams];
+        rMap = new Map[nStreams];
+        done = new boolean[nStreams];
 
 		// Initialize all the BigTables and Streams
-        for(int i=0; i<5; i++){
-            bigTable[i] = new bigT(bigtableName+"_"+(i+1));
+        for(int i=0; i<nStreams; i++){
+            bigTable[i] = new bigT(bigtableNames[i]);
             stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter);
             rMap[i] = stream[i].getNext();
             if(rMap[i]==null) done[i] = true;
@@ -51,7 +59,7 @@ public class BigStream{
 
 		// Initialize the first null Map as minimum for further comparison
         int minInd = 0; 
-        for(int i=0; i<5; i++){
+        for(int i=0; i<nStreams; i++){
             if(rMap[i]!=null){
                 minInd = i;
                 break;
@@ -59,13 +67,16 @@ public class BigStream{
         }
 
         // Find minimum out of all streams
-        for(int i=0; i<5; i++){
+        for(int i=0; i<nStreams; i++){
             if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==1 ){
                 minInd = i;
             }
         }
 
-        // Print the minimum valued Map
+        // Store the Index to which the minimum valued map belongs
+        outInd = minInd;
+
+        // Create a new Map from the minimum valued map
         Map out = new Map(rMap[minInd]);
 
         // Call stream.getNext() on the stream that we used
@@ -79,7 +90,7 @@ public class BigStream{
     /** Closes all the 5 streams
     */
 	public void close(){
-		for(int i=0; i<5; i++) stream[i].close();
+		for(int i=0; i<nStreams; i++) stream[i].close();
 	}
     
     /** Checks if all elements of a boolean array are true

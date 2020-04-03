@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class getCounts implements GlobalConst {
 
-    public static String bigtableName;
+    public static String[] bigtableNames;
 
     public static void main(String[] args) {
         //Parsing arguments:
@@ -17,12 +17,14 @@ public class getCounts implements GlobalConst {
             return;
         }
 
-        bigtableName = args[0];
+        String bigtableName = args[0];
         int numbuffs = Integer.parseInt(args[1]);
 
         String dbpath = "/tmp/" + System.getProperty("user.name") + bigtableName;
         SystemDefs sysdef = new SystemDefs(dbpath, 0, numbuffs, "Clock");
 
+        bigtableNames = new String[5];
+        for(int i=0; i<5; i++) bigtableNames[i] = bigtableName + "_" + (i+1);
 
         try {
             System.out.println("Map    Count: " +getMapCnt());
@@ -49,7 +51,7 @@ public class getCounts implements GlobalConst {
 
             // Initialize all the BigTables and Streams
             for(int i=0; i<5; i++){
-                bigTable[i] = new bigT(bigtableName+"_"+(i+1));
+                bigTable[i] = new bigT(bigtableNames[i]);
                 mapCount += bigTable[i].getMapCnt();
             }
         } catch(Exception e){
@@ -66,7 +68,7 @@ public class getCounts implements GlobalConst {
 
         int rowCnt = 0;
         try{
-            BigStream s = new BigStream(bigtableName, 1, "*", "*", "*");
+            BigStream s = new BigStream(bigtableNames, 1, "*", "*", "*");
             String prevRow = "";
 
             while(true){
@@ -98,7 +100,7 @@ public class getCounts implements GlobalConst {
 
         int colCnt = 0;
         try{
-            BigStream s = new BigStream(bigtableName, 2, "*", "*", "*");
+            BigStream s = new BigStream(bigtableNames, 2, "*", "*", "*");
             String prevCol = "";
 
             while(true){
