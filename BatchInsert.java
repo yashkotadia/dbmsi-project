@@ -51,7 +51,7 @@ public class BatchInsert implements GlobalConst {
                 m.setValue(attributes[2]);
 
                 try {
-                    tempbt.insertMap(m.returnMapByteArray(), false);
+                    tempbt.insertMap(m.returnMapByteArray());
                     System.out.println("Added map timestamp to temporary: " + attributes[3]);
                 }catch (Exception e) {
                     System.err.println("*** error in bigT.insertMap() ***");
@@ -107,8 +107,8 @@ public class BatchInsert implements GlobalConst {
                 }
                 if(prevCount<=3){
                     System.out.println("Added Map TS from temp to new: " + rMap.getTimeStamp());
-                    if(stream.outInd==5) newBTs[databaseType-1].insertMap(rMap.returnMapByteArray(), true);
-                    else newBTs[stream.outInd].insertMap(rMap.returnMapByteArray(), true);
+                    if(stream.outInd==5) newBTs[databaseType-1].insertMap(rMap.returnMapByteArray());
+                    else newBTs[stream.outInd].insertMap(rMap.returnMapByteArray());
                 }
             }
             stream.close();
