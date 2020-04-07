@@ -262,6 +262,13 @@ public class bigT implements Filetype,  GlobalConst {
 	  tempfilecount ++;
 	  
 	}
+
+	else if(name.length()>3 && name.substring(0,4).equals("temp")){
+		_fileName = name;
+		_ftype = TEMP;
+		_itype = 1;
+	}
+
       else
 	{
 	  _fileName = name;
@@ -280,7 +287,7 @@ public class bigT implements Filetype,  GlobalConst {
       
       Page apage = new Page();
       _firstDirPageId = null;
-      if (_ftype == ORDINARY)
+      //if (_ftype == ORDINARY)
 	_firstDirPageId = get_file_entry(_fileName);
       
       if(_firstDirPageId==null)
@@ -749,7 +756,7 @@ public class bigT implements Filetype,  GlobalConst {
       
       
       unpinPage(currentDirPageId, true /* = DIRTY */);
-      if(_ftype == ORDINARY)
+      if(_ftype == ORDINARY && _itype!=1)
       	insertMapIndex(new MID(mid.pageNo, mid.slotNo), mapPtr); // Update the index      
       
       return mid;
@@ -900,7 +907,7 @@ public class bigT implements Filetype,  GlobalConst {
 	      
 	    }
 	}
-	  if(_ftype==ORDINARY)
+	  if(_ftype==ORDINARY && _itype!=1)
 	  	deleteMapIndex(getMap(mid), mid);
       return true;
     }
@@ -1067,6 +1074,19 @@ public class bigT implements Filetype,  GlobalConst {
       // Mark the deleted flag (even if it doesn't get all the way done).
       _file_deleted = true;
       
+      // Delete Index
+      if(_ftype==ORDINARY && _itype!=1){
+      	try{
+      		//System.out.println("Attempting to delete index of "+_fileName);
+	      	BTreeFile ind = SystemDefs.JavabaseDB.initIndex(_fileName ,_itype);
+	        ind.destroyFile();
+	    } catch(Exception e) {
+	    	System.err.println("***** Error while deleting Index in BigT deletion *******");
+      		e.printStackTrace();
+      		Runtime.getRuntime().exit(1);
+	    }
+      }
+
       // Deallocate all data pages
       PageId currentDirPageId = new PageId();
       currentDirPageId.pid = _firstDirPageId.pid;
@@ -1107,7 +1127,7 @@ public class bigT implements Filetype,  GlobalConst {
 	      //currentDirPage.openHFpage(pageinbuffer);
 	    }
 	}
-      
+
       delete_file_entry( _fileName );
       //System.out.println("Successfully deleted: "+_fileName);
     }
@@ -1212,6 +1232,20 @@ public class bigT implements Filetype,  GlobalConst {
 
   } // end of delete_file_entry
 
+  public void createIndex(){
+  	if(_itype!=1){
+	  	try{
+	  		//System.out.println(_fileName);
+		  	BTreeFile ind = SystemDefs.JavabaseDB.initIndex(_fileName ,_itype);
+	        ind.close();
+	    } catch( Exception e){
+	    	System.err.println("***** Error while creating Index *******");
+      		e.printStackTrace();
+      		Runtime.getRuntime().exit(1);
+	    }
+	  }
+  }
+
   /** Called in insertMap, used to update the BTreeFile 
   *  @param mid Map ID of the map whose key is being inserted
   *  @param  mapPtr Map array
@@ -1219,31 +1253,26 @@ public class bigT implements Filetype,  GlobalConst {
   private void insertMapIndex(MID mid, byte[] mapPtr){
 
   	Map m = new Map(mapPtr, 0, mapPtr.length);
-
+  	BTreeFile ind = null;
   	try{
-  		SystemDefs.JavabaseDB.initIndex(_itype);
+  		ind = SystemDefs.JavabaseDB.initIndex(_fileName, _itype);
 	  	switch(_itype){
 	  		default: break;
 
 	  		case 2:
-	  				SystemDefs.JavabaseDB.indices[0].insert(new StringKey(m.getRowLabel()), mid);
+	  				ind.insert(new StringKey(m.getRowLabel()), mid);
 	  				break;
 	  		case 3:
-	  				SystemDefs.JavabaseDB.indices[1].insert(new StringKey(m.getColumnLabel()), mid);
+	  				ind.insert(new StringKey(m.getColumnLabel()), mid);
 	  				break;
 	  		case 4:
-	  				SystemDefs.JavabaseDB.indices[2].insert(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
+	  				ind.insert(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
 	  				break;
 	  		case 5:
-	  				SystemDefs.JavabaseDB.indices[3].insert(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
+	  				ind.insert(new StringStringKey(m.getRowLabel(), m.getValue()), mid);
 	  				break;
 	  	}
-	  	SystemDefs.JavabaseDB.closeIndex(_itype);
-	  	/*
-	  	if(true){
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[_itype-2].getHeaderPage());
-	  	}*/
-	  	
+	  	ind.close();	  	
 
 	}catch (Exception e) {
 		System.err.println("***** Error while inserting Map into index insertMapIndex() *******");
@@ -1259,28 +1288,27 @@ public class bigT implements Filetype,  GlobalConst {
   */
   private void deleteMapIndex(Map m, MID mid){
 
+  	BTreeFile ind = null;
+
   	try{
-  		SystemDefs.JavabaseDB.initIndex(_itype);
+  		ind = SystemDefs.JavabaseDB.initIndex(_fileName, _itype);
 	  	switch(_itype){
 	  		default: break;
 
 	  		case 2:
-	  				SystemDefs.JavabaseDB.indices[0].Delete(new StringKey(m.getRowLabel()), mid);
+	  				ind.Delete(new StringKey(m.getRowLabel()), mid);
 	  				break;
 	  		case 3:
-	  				SystemDefs.JavabaseDB.indices[1].Delete(new StringKey(m.getColumnLabel()), mid);
+	  				ind.Delete(new StringKey(m.getColumnLabel()), mid);
 	  				break;
 	  		case 4:
-	  				SystemDefs.JavabaseDB.indices[2].Delete(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
+	  				ind.Delete(new StringStringKey(m.getColumnLabel(), m.getRowLabel()), mid);
 	  				break;
 	  		case 5:
-	  				SystemDefs.JavabaseDB.indices[3].Delete(new StringStringKey(m.getRowLabel(), m.getValue()), mid);	  				break;
+	  				ind.Delete(new StringStringKey(m.getRowLabel(), m.getValue()), mid);	  				
+	  				break;
 	  	}
-	  	SystemDefs.JavabaseDB.closeIndex(_itype);
-	  	/*if(true){
-	  		BT.printAllLeafPages(SystemDefs.JavabaseDB.indices[_itype-2].getHeaderPage());
-	  	}*/
-	  	
+	  	ind.close();	  	
 
 	}catch (Exception e) {
 		System.err.println("***** Error while deleting Map from index insertMapIndex() *******");
