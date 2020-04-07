@@ -23,7 +23,7 @@ public class BatchInsert implements GlobalConst {
         String dataFileName = args[0], bigtableName = args[2];
         int databaseType = Integer.parseInt(args[1]);
         int numbuffs = Integer.parseInt(args[3]);
-        String dbpath = "/tmp/"+System.getProperty("user.name")+bigtableName; 
+        String dbpath = "/tmp/"+System.getProperty("user.name")+"database"; 
         SystemDefs sysdef = new SystemDefs( dbpath, 20000, numbuffs, "Clock");
 
         String[] streamBTNames = new String[6];
@@ -62,33 +62,34 @@ public class BatchInsert implements GlobalConst {
                 line = br.readLine();
             }
 
-            // Ensure that all bigTables are there before attempting renaming
-            for(int i=1; i<=5; i++) new bigT(bigtableName +"_" +i);
+            // Ensure that all bigTables and their indexes are there before attempting renaming
+            for(int i=1; i<=5; i++){
+                bigT b = new bigT(bigtableName +"_" +i);
+                b.createIndex();
+            } 
 
-            // Rename all the bigTable file entries to something else
-            for(int i=0; i<5; i++)
+            // Rename all the bigTable file entries along with indexes to something else
+            for(int i=0; i<5; i++){
                 SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +(i+1), streamBTNames[i] );
+                if(i!=0)
+                SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +(i+1)+"_index", streamBTNames[i]+"_index" );
+            }
 
             // Create new Big Tables
+            //System.out.println("Creating new big tables");
             bigT[] newBTs = new bigT[5];
-            for(int i=0; i<5; i++)
+            for(int i=0; i<5; i++){
                 newBTs[i] = new bigT(bigtableName +"_" +(i+1));
+                newBTs[i].createIndex();
+            }
 
             // Initialize the stream
             BigStream stream = new BigStream(streamBTNames, 6, "*", "*", "*");
 
-            // Reinitialize indexes
-            for(int i=1; i<=5; i++){
-                SystemDefs.JavabaseDB.initIndex(i);
-                SystemDefs.JavabaseDB.deleteIndex(i);
-                SystemDefs.JavabaseDB.initIndex(i);
-                SystemDefs.JavabaseDB.closeIndex(i);
-            }
-
-            // Delete the old big tables
+            // Delete the old big tables & their indexes
             for(int i=0; i<5; i++) {
                 bigT b = new bigT(streamBTNames[i]);
-                b.deletebigT();
+                b.deletebigT(); // Handles deletion of index as well
             }
             
             // Distribute the maps to respective big tables
