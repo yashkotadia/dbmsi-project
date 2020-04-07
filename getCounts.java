@@ -20,7 +20,7 @@ public class getCounts implements GlobalConst {
         String bigtableName = args[0];
         int numbuffs = Integer.parseInt(args[1]);
 
-        String dbpath = "/tmp/" + System.getProperty("user.name") + bigtableName;
+        String dbpath = "/tmp/" + System.getProperty("user.name") + "database";
         SystemDefs sysdef = new SystemDefs(dbpath, 0, numbuffs, "Clock");
 
         bigtableNames = new String[5];
