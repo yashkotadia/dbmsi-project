@@ -24,6 +24,7 @@ public class Stream implements GlobalConst{
     private Sort sort;
     private Iterator scan=null;
     private int type;
+    private String bt_name;
 
     /**
      *
@@ -50,6 +51,7 @@ public class Stream implements GlobalConst{
       order[0] = new TupleOrder(TupleOrder.Ascending);
       order[1] = new TupleOrder(TupleOrder.Descending);
       type = bt._itype;
+      bt_name = bt.get_fileName();
 
       boolean rowAll = rowFilter.equals("*");
       boolean columnAll = columnFilter.equals("*");
@@ -60,31 +62,31 @@ public class Stream implements GlobalConst{
         if(type==2 && !rowAll){
 
         expr = getCondExpr(rowFilter);
-        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_index", rowFilter, columnFilter, valueFilter, expr);
+        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
 
       } else if(type==3 && !columnAll){
 
         expr = getCondExpr(columnFilter);
-        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_index", rowFilter, columnFilter, valueFilter, expr);
+        scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
 
       } else if(type==4 && !columnAll){
 
         if(columnFilter.charAt(0)=='[' && !rowAll){
           expr = getCondExpr(columnFilter, "*");
-          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_row_index", rowFilter, columnFilter, valueFilter, expr);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
         } else {
           expr = getCondExpr(columnFilter, rowFilter);
-          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "column_row_index", rowFilter, columnFilter, valueFilter, expr);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
         }
 
       } else if(type==5 && !rowAll){
 
         if(rowFilter.charAt(0)=='[' && !valueAll){
           expr = getCondExpr(rowFilter, "*");
-          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_value_index", rowFilter, columnFilter, valueFilter, expr);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
         } else {
           expr = getCondExpr(rowFilter, valueFilter);
-          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt.get_fileName(), "row_value_index", rowFilter, columnFilter, valueFilter, expr);
+          scan = new IndexScan ( new IndexType(IndexType.B_Index), bt_name, bt_name+"_index", rowFilter, columnFilter, valueFilter, expr);
         }
 
       } else {
