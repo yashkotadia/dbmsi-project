@@ -796,8 +796,12 @@ public class bigT implements Filetype,  GlobalConst {
 			     currentDataPageRid);
       
       if(status != true) return status;	// map not found
-      
-      // ASSERTIONS:
+
+		if(_ftype==ORDINARY && _itype!=1)
+			deleteMapIndex(getMap(mid), mid);
+
+
+		// ASSERTIONS:
       // - currentDirPage, currentDirPageId valid and pinned
       // - currentDataPage, currentDataPageid valid and pinned
       
@@ -907,9 +911,7 @@ public class bigT implements Filetype,  GlobalConst {
 	      
 	    }
 	}
-	  if(_ftype==ORDINARY && _itype!=1)
-	  	deleteMapIndex(getMap(mid), mid);
-      return true;
+	  return true;
     }
   
   
@@ -1028,6 +1030,14 @@ public class bigT implements Filetype,  GlobalConst {
 	 * @exception InvalidMapSizeException Invalid tuple size
 	 * @exception IOException I/O errors
 	 */
+  public Stream openStream(int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+		  throws InvalidTupleSizeException, InvalidMapSizeException,
+		  IOException
+  {
+	  Stream newStream = new Stream(this, orderType, rowFilter, columnFilter, valueFilter, useSort);
+	  return newStream;
+  }
+
 	public Stream openStream(int orderType, String rowFilter, String columnFilter, String valueFilter)
 			throws InvalidTupleSizeException, InvalidMapSizeException,
 			IOException
