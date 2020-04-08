@@ -25,7 +25,17 @@ public class BigStream{
 
     /** Opens the bigtables and their streams
     */
-	public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter)
+
+    public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter)
+            throws HFException, InvalidTupleSizeException,
+            InvalidMapSizeException, IOException,
+            HFBufMgrException, HFDiskMgrException {
+
+        this(bigtableNames, orderType, rowFilter, columnFilter, valueFilter, true);
+    }
+
+
+	public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
 		throws HFException, InvalidTupleSizeException,
 				InvalidMapSizeException, IOException,
 				HFBufMgrException, HFDiskMgrException{
@@ -39,9 +49,10 @@ public class BigStream{
         done = new boolean[nStreams];
 
 		// Initialize all the BigTables and Streams
+
         for(int i=0; i<nStreams; i++){
             bigTable[i] = new bigT(bigtableNames[i]);
-            stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter);
+            stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter, useSort);
             rMap[i] = stream[i].getNext();
             if(rMap[i]==null) done[i] = true;
         }
@@ -51,7 +62,15 @@ public class BigStream{
     /**
     * Uses the K sorted arrays algorithm for creating a sorted stream from 5 sorted streams
     */
-	public Map getNext() 
+    public Map getNext()
+            throws InvalidMapSizeException, IOException, MapUtilsException {
+
+        MID mid = new MID();
+        return this.getNext(mid);
+    }
+
+
+	public Map getNext(MID mid)
 		throws InvalidMapSizeException, IOException, MapUtilsException
 	{
 
@@ -80,8 +99,12 @@ public class BigStream{
         // Create a new Map from the minimum valued map
         Map out = new Map(rMap[minInd]);
 
+        mid.pageNo.pid = stream[minInd].scan.outmid.pageNo.pid;
+        mid.slotNo = stream[minInd].scan.outmid.slotNo;
+
         // Call stream.getNext() on the stream that we used
         rMap[minInd] = stream[minInd].getNext();
+
         if(rMap[minInd]==null) done[minInd] = true;
 
         return out;
