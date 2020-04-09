@@ -68,7 +68,7 @@ public class MapInsert implements GlobalConst {
                     resmid = new MID(mid.pageNo, mid.slotNo);
                 }
 
-                System.out.println(map.getRowLabel() + " " + map.getColumnLabel() + " " + map.getValue() + " " + map.getTimeStamp() + " storageType=" + s.outInd+1);
+                System.out.println(map.getRowLabel() + " " + map.getColumnLabel() + " " + map.getValue() + " " + map.getTimeStamp() + " storageType=" + (s.outInd+1));
 
             }
 
