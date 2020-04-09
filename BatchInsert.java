@@ -83,7 +83,7 @@ public class BatchInsert implements GlobalConst {
                 newBTs[i].createIndex();
             }
 
-            // Initialize the stream
+            // Initialize the Big Stream
             BigStream stream = new BigStream(streamBTNames, 6, "*", "*", "*");
 
             // Delete the old big tables & their indexes
@@ -114,6 +114,33 @@ public class BatchInsert implements GlobalConst {
             }
             stream.close();
             tempbt.deletebigT();
+
+            // Reorder bigT type 3,4,5 bigTs based on the expected storage order
+            for(int i=3; i<=5; i++){
+                SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +i, "old_"+i );
+                SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +i+"_index", "old_"+i+"_index" );
+
+                int ordertype = 1;
+                if (i == 2 | i == 5)
+                    ordertype = 1;
+                else if(i == 3 | i == 4)
+                    ordertype = 2;
+                bigT b = new bigT("old_"+i);
+                Stream reorderStream = new Stream(b, ordertype, "*", "*", "*");
+
+                b.deletebigT();
+
+                b = new bigT(bigtableName +"_" +i);
+                b.createIndex();
+                while(true){
+
+                    Map out = reorderStream.getNext();
+                    if(out == null) break;
+
+                    b.insertMap(out.getMapByteArray());
+                }
+                reorderStream.close();
+            }
 
 
             sysdef.close();
