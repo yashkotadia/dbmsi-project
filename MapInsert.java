@@ -1,5 +1,6 @@
 import global.*;
 import BigT.*;
+import iterator.*;
 
 import java.io.IOException;
 import java.lang.*;
@@ -68,7 +69,7 @@ public class MapInsert implements GlobalConst {
                     resmid = new MID(mid.pageNo, mid.slotNo);
                 }
 
-                System.out.println(map.getRowLabel() + " " + map.getColumnLabel() + " " + map.getValue() + " " + map.getTimeStamp() + " storageType=" + (s.outInd+1));
+                System.out.println(map.getRowLabel() + ", " + map.getColumnLabel() + ", " + map.getValue() + ", " + map.getTimeStamp() + " | storageType=" + (s.outInd+1));
 
             }
 
@@ -78,7 +79,8 @@ public class MapInsert implements GlobalConst {
                 bigT Bt = new bigT(bigtableNames[s.outInd]);
 
                 //resmap = Bt.getMap(resmid);
-                System.out.println("Deleted Map: " + resmap.getRowLabel() + " " + resmap.getColumnLabel() + " " + resmap.getValue() + " " + resmap.getTimeStamp());
+                System.out.print("Deleted Map: ");
+                resmap.print();
 
                 Bt.deleteMap(resmid);
             }
@@ -86,8 +88,8 @@ public class MapInsert implements GlobalConst {
 
             //Insert the map:
             String btName = bigtableName +  "_" + storageType;
-            bigT existingBt = new bigT(btName);
-            existingBt.insertMap(m.getMapByteArray());
+            //bigT existingBt = new bigT(btName);
+            //existingBt.insertMap(m.getMapByteArray());
 
             int ordertype = 6;
             switch(storageType){
@@ -97,31 +99,46 @@ public class MapInsert implements GlobalConst {
                     case 5: ordertype = 7; break;
             }
 
-            Stream newStream = new Stream(existingBt, ordertype, "*", "*", "*");
-
             String renamedBT = "old_" + storageType;
             SystemDefs.JavabaseDB.rename_file_entry(btName, renamedBT);
             if (storageType != 1)
                 SystemDefs.JavabaseDB.rename_file_entry(btName + "_index", renamedBT + "_index");
 
-            existingBt = new bigT(renamedBT);
-            existingBt.deletebigT();
-
+            bigT existingBt = new bigT(renamedBT);
+            FileScan fs = new FileScan(renamedBT, "*", "*", "*");
 
             bigT bt = new bigT(btName);
             bt.createIndex();
-            System.out.println("Maps Inserted:");
+
+            boolean inserted = false;
+
             while(true){
 
-                Map out = newStream.getNext();
-                if(out == null) break;
+                Map out = fs.get_next();
+                if(out == null){
+                    if(!inserted){
+                        bt.insertMap(m.getMapByteArray());
+                        m.print();
+                        inserted = true;
+                    }
+                    break;
+                }
+
+                if(MapUtils.CompareMapWithMap(out, m, ordertype)==1 && !inserted){
+                    bt.insertMap(m.getMapByteArray());
+                    m.print();
+                    inserted = true;
+                }
 
                 bt.insertMap(out.getMapByteArray());
 
-                System.out.println(out.getRowLabel() + " " + out.getColumnLabel() + " " + out.getValue() + " " + out.getTimeStamp());
+                out.print();
             }
 
-            newStream.close();
+            if(!inserted) System.out.println("New Map not inserted");
+
+            fs.close();
+            existingBt.deletebigT();
             sysdef.close();
 
         } catch (InvalidMapSizeException e) {
