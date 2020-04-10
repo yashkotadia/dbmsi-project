@@ -256,11 +256,12 @@ public class Map implements GlobalConst{
   sval = Convert.getStrValue(map_offset+4+ROW_LABEL_SIZE, data, COLUMN_LABEL_SIZE);
   System.out.print(sval+", ");
 
-  val = Convert.getIntValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE, data);
-  System.out.print(val+", ");
-
   sval = Convert.getStrValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4, data, map_length-8-ROW_LABEL_SIZE-COLUMN_LABEL_SIZE);
-  System.out.print(sval+"]");
+  System.out.print(sval+", ");
+
+  val = Convert.getIntValue(map_offset+4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE, data);
+  System.out.print(val+"]\n");
+  
  }
 
 }
