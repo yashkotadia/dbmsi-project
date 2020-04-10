@@ -20,7 +20,7 @@ import iterator.*;
  */
 public class Stream implements GlobalConst{
 
-    private static int SORTPGNUM = 100;
+    private static int SORTPGNUM = 30;
     private Sort sort;
     public Iterator scan=null;
     private int type;
