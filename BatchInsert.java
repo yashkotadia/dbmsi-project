@@ -121,10 +121,11 @@ public class BatchInsert implements GlobalConst {
                 SystemDefs.JavabaseDB.rename_file_entry(bigtableName +"_" +i+"_index", "old_"+i+"_index" );
 
                 int ordertype = 1;
-                if (i == 2 | i == 5)
-                    ordertype = 1;
-                else if(i == 3 | i == 4)
-                    ordertype = 2;
+                switch(i){
+                    case 3: ordertype = 2; break;
+                    case 4: ordertype = 2; break;
+                    case 5: ordertype = 7; break;
+                }
                 bigT b = new bigT("old_"+i);
                 Stream reorderStream = new Stream(b, ordertype, "*", "*", "*");
 
