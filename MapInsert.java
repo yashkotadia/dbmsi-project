@@ -90,10 +90,12 @@ public class MapInsert implements GlobalConst {
             existingBt.insertMap(m.getMapByteArray());
 
             int ordertype = 6;
-            if (storageType == 2 | storageType == 5)
-                ordertype = 3;
-            else if(storageType == 3 | storageType == 4)
-                ordertype = 2;
+            switch(storageType){
+                    case 2: ordertype = 6; break;
+                    case 3: ordertype = 2; break;
+                    case 4: ordertype = 2; break;
+                    case 5: ordertype = 7; break;
+            }
 
             Stream newStream = new Stream(existingBt, ordertype, "*", "*", "*");
 
