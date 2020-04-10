@@ -30,6 +30,7 @@ public class BatchInsert implements GlobalConst {
         for(int i=0; i<5; i++) streamBTNames[i] = "old_"+(i+1);
 
         //Reading input csv file:
+        System.out.println("Inserting new maps to temporary bigT");
         try {
             BufferedReader br = new BufferedReader(new FileReader(dataFileName));
 
@@ -52,7 +53,7 @@ public class BatchInsert implements GlobalConst {
 
                 try {
                     tempbt.insertMap(m.returnMapByteArray());
-                    System.out.println("Added map timestamp to temporary: " + attributes[3]);
+                    m.print();
                 }catch (Exception e) {
                     System.err.println("*** error in bigT.insertMap() ***");
                     e.printStackTrace();
@@ -93,6 +94,7 @@ public class BatchInsert implements GlobalConst {
             }
             
             // Distribute the maps to respective big tables
+            System.out.println("Redistributing Maps");
             Map prevMap = null;
             Map rMap;
             int prevCount = 0;
@@ -107,7 +109,7 @@ public class BatchInsert implements GlobalConst {
                     prevMap = new Map(rMap);
                 }
                 if(prevCount<=3){
-                    System.out.println("Added Map TS from temp to new: " + rMap.getTimeStamp());
+                    rMap.print();
                     if(stream.outInd==5) newBTs[databaseType-1].insertMap(rMap.returnMapByteArray());
                     else newBTs[stream.outInd].insertMap(rMap.returnMapByteArray());
                 }
