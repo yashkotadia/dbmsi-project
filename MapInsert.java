@@ -43,12 +43,13 @@ public class MapInsert implements GlobalConst {
             m.setValue(val);
 
             // Initialize the stream
-            BigStream s = new BigStream(bigtableNames, 6, row, column, "*", false);
+            BigStream s = new BigStream(bigtableName, 6, row, column, "*", false);
 
             // Delete the map with smallest timestamp
             MID resmid = null;
             Map resmap = null;
             int resCnt = 0;
+            int resInd = 0;
             Map map;
             MID mid = new MID();
 
@@ -57,7 +58,7 @@ public class MapInsert implements GlobalConst {
             {
                 resCnt++;
                 //Checking if map is a duplicate of the new map
-                if (map.getValue().equals(m.getValue()))
+                if (map.getTimeStamp() == m.getTimeStamp())
                     {
                         System.out.println("Trying to insert a duplicate map");
                         return;
@@ -65,8 +66,9 @@ public class MapInsert implements GlobalConst {
 
                 if (resmap == null || map.getTimeStamp() <= resmap.getTimeStamp())
                 {
-                    resmap = new Map(map);
+                    resmap = map;
                     resmid = new MID(mid.pageNo, mid.slotNo);
+                    resInd = s.outInd;
                 }
 
                 System.out.println(map.getRowLabel() + ", " + map.getColumnLabel() + ", " + map.getValue() + ", " + map.getTimeStamp() + " | storageType=" + (s.outInd+1));
@@ -76,7 +78,7 @@ public class MapInsert implements GlobalConst {
             if (resmap != null && resCnt >= 3)
             {
                 //Delete this map from the bigT
-                bigT Bt = new bigT(bigtableNames[s.outInd]);
+                bigT Bt = new bigT(bigtableNames[resInd]);
 
                 //resmap = Bt.getMap(resmid);
                 System.out.print("Deleted Map: ");
