@@ -183,7 +183,7 @@ public class MapUtils
 				return 0;
 
 			case 7:
-				// order type: row label, column label, descending time stamp
+				// order type: row label, value
 				
 				// Compare two strings
 				
@@ -201,6 +201,16 @@ public class MapUtils
 				if(m1_s.compareTo( m2_s)>0)return 1;
 				if(m1_s.compareTo( m2_s)<0)return -1;
 				
+				return 0;
+
+			case 8:
+				// orderType: values (used in rowjoin)
+				m1_s = m1.getValue();
+				m2_s = m2.getValue();
+
+				if(m1_s.compareTo(m2_s)>0) return 1;
+				if(m1_s.compareTo(m2_s)<0) return -1;
+
 				return 0;
 
 			default:
