@@ -1,0 +1,126 @@
+import global.*;
+import index.*;
+import BigT.*;
+import java.io.*;
+import java.lang.*;
+import diskmgr.*;
+import bufmgr.*;
+import btree.*; 
+import catalog.*;
+import iterator.*;
+
+public class rowjoin{
+	public static void main(String args[]){
+		if (args.length != 5 || args[0] == "-h")
+        {
+            System.out.println("Enter correct arguments: \nrowjoin BTNAME1 BTNAME2 OUTBTNAME COLUMNFILTER NUMBUF");
+            return;
+        }
+        String bigTable1Name = args[0]; String bigTable2Name = args[1];
+        String outBigTableName = args[2]; 
+        String colFilter = args[3];
+        int numbuffs = Integer.parseInt(args[4]);
+
+        String dbpath = "/tmp/" + System.getProperty("user.name") + "database";
+        SystemDefs sysdef = new SystemDefs(dbpath, 0, numbuffs, "Clock");
+
+        String[] bigtable1Names = new String[5];
+        for(int i=0; i<5; i++) 
+            bigtable1Names[i] = bigtable1Name + "_" + (i+1);
+
+        String[] bigtable2Names = new String[5];
+        for(int i=0; i<5; i++) 
+            bigtable2Names[i] = bigtable2Name + "_" + (i+1);
+
+
+
+        //Initialize two bigstreams, one on each of the two bigbigTables.
+        BigStream bs1 = new BigStream(bigtable1Names, 6, "*", colFilter, "*"); // orderType = 6
+        BigStream bs2 = new BigStream(bigtable2Names, 6, "*", colFilter, "*"); // orderType = 6
+
+        //Initialize two bigTs to contain only most recent maps 
+        BigT outerbt = new BigT(null);
+        BigT innerbt = new BigT(null);
+
+        //Get only the most recents maps and output them to a temp bigT
+        Map prevMap = null;
+        Map rMap;
+        while(true){
+            if((rMap = bs1.getNext()) == null){
+                break;
+            }
+            if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
+                //Output this map to bigT
+                outerbt.insertMap(rmap.getMapByteArray());
+            }
+            prevMap = new Map(rmap);
+             
+        }
+        
+        prevMap = null;
+        while(true){
+            if((rMap = bs2.getNext()) == null){
+                break;
+            }
+            if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
+                //Output this map to the temp bigT
+                innerbt.insertMap(rmap.getMapByteArray());
+            }
+            prevMap = new Map(rmap);
+            
+        }
+        //Create streams on the new temp bigTs, ordered on values
+        Stream outerStream = new Stream(outerbt, 8, "*", "*", "*");
+        Stream innerStream = new Stream(innerbt, 8, "*", "*", "*");
+
+        SortMerge sm = null;
+        try{
+            sm = new SortMerge(bigtable1Names, bigtable2Names, innerStream, outBigTableName);
+        }
+        catch(Exception e){
+            System.err.println("*** join error in SortMerge constructor ***"); 
+            status = FAIL;
+            System.err.println (""+e);
+            e.printStackTrace();
+        }
+
+        // try{
+        //     while ((m = sm.get_next()) != null)
+        //         m.print();
+        // }
+        // catch (Exception e){
+        //     System.err.println (""+e);
+        //     e.printStackTrace();
+        //     status = FAIL;
+        // }
+
+        try{
+            sm.performJoin();
+        }
+        catch(Exception e){
+            System.err.println (""+e);
+            e.printStackTrace();
+            status = FAIL;
+        }
+        
+        if (status != OK){
+            //bail out
+            System.err.println ("*** Error in get next tuple ");
+            Runtime.getRuntime().exit(1);
+        }
+        try {
+            sm.close();
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+        System.out.println ("\n"); 
+        
+        if (status != OK) {
+            //bail out
+            System.err.println ("*** Error in closing ");
+            Runtime.getRuntime().exit(1);
+        }
+	}
+}
