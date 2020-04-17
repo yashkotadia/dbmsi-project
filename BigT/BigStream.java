@@ -26,6 +26,40 @@ public class BigStream{
     /** Opens the bigtables and their streams
     */
 
+    public BigStream(String bigtableName, int orderType, String rowFilter, String columnFilter, String valueFilter)
+            throws HFException, InvalidTupleSizeException,
+            InvalidMapSizeException, IOException,
+            HFBufMgrException, HFDiskMgrException {
+        this(bigtableName, orderType, rowFilter, columnFilter, valueFilter, true);
+    }
+
+    public BigStream(String bigtableName, int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+            throws HFException, InvalidTupleSizeException,
+            InvalidMapSizeException, IOException,
+            HFBufMgrException, HFDiskMgrException {
+
+        String[] bigtableNames = new String[5];
+        for(int i=0;i<5; i++) bigtableNames[i] = bigtableName +"_" + (i+1);
+
+        this.orderType = orderType;
+        nStreams = bigtableNames.length;
+
+        bigTable = new bigT[nStreams];
+        stream = new Stream[nStreams];
+        rMap = new Map[nStreams];
+        done = new boolean[nStreams];
+
+        // Initialize all the BigTables and Streams
+
+        for(int i=0; i<nStreams; i++){
+            bigTable[i] = new bigT(bigtableNames[i]);
+            stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter, useSort);
+            rMap[i] = stream[i].getNext();
+            if(rMap[i]==null) done[i] = true;
+        }
+        
+    }
+
     public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter)
             throws HFException, InvalidTupleSizeException,
             InvalidMapSizeException, IOException,

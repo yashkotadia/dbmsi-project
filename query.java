@@ -32,7 +32,7 @@ public class query implements GlobalConst {
                 Map out = s.getNext();
                 if(out == null) break;
 
-                System.out.println(out.getRowLabel() + " " + out.getColumnLabel() + " " + out.getValue() + " " + out.getTimeStamp());
+                out.print();
             }
 
             s.close();
