@@ -9,9 +9,29 @@ import btree.*;
 import catalog.*;
 import iterator.*;
 
-public class rowjoin{
-	public static void main(String args[]){
-		if (args.length != 5 || args[0] == "-h")
+public class rowjoin implements GlobalConst{
+	private static boolean OK = true;
+    private static boolean FAIL = false;
+    public static void main(String args[])
+        throws JoinNewFailed ,
+       JoinLowMemory,
+       SortException,
+       HFException,
+       HFBufMgrException,
+       HFDiskMgrException,
+       IOException,
+       InvalidMapSizeException,
+       InvalidSlotNumberException,
+       InvalidTupleSizeException,
+       MapUtilsException,
+       SpaceNotAvailableException,
+       FileScanException,
+       IndexException,
+       JoinsException,
+       Exception
+    {
+		boolean status = OK;
+        if (args.length != 5 || args[0] == "-h")
         {
             System.out.println("Enter correct arguments: \nrowjoin BTNAME1 BTNAME2 OUTBTNAME COLUMNFILTER NUMBUF");
             return;
@@ -26,11 +46,11 @@ public class rowjoin{
 
         String[] bigtable1Names = new String[5];
         for(int i=0; i<5; i++) 
-            bigtable1Names[i] = bigtable1Name + "_" + (i+1);
+            bigtable1Names[i] = bigTable1Name + "_" + (i+1);
 
         String[] bigtable2Names = new String[5];
         for(int i=0; i<5; i++) 
-            bigtable2Names[i] = bigtable2Name + "_" + (i+1);
+            bigtable2Names[i] = bigTable2Name + "_" + (i+1);
 
 
 
@@ -39,8 +59,8 @@ public class rowjoin{
         BigStream bs2 = new BigStream(bigtable2Names, 6, "*", colFilter, "*"); // orderType = 6
 
         //Initialize two bigTs to contain only most recent maps 
-        BigT outerbt = new BigT(null);
-        BigT innerbt = new BigT(null);
+        bigT outerbt = new bigT(null);
+        bigT innerbt = new bigT(null);
 
         //Get only the most recents maps and output them to a temp bigT
         Map prevMap = null;
@@ -51,9 +71,9 @@ public class rowjoin{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to bigT
-                outerbt.insertMap(rmap.getMapByteArray());
+                outerbt.insertMap(rMap.getMapByteArray());
             }
-            prevMap = new Map(rmap);
+            prevMap = new Map(rMap);
              
         }
         
@@ -64,9 +84,9 @@ public class rowjoin{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to the temp bigT
-                innerbt.insertMap(rmap.getMapByteArray());
+                innerbt.insertMap(rMap.getMapByteArray());
             }
-            prevMap = new Map(rmap);
+            prevMap = new Map(rMap);
             
         }
         //Create streams on the new temp bigTs, ordered on values
@@ -75,7 +95,7 @@ public class rowjoin{
 
         SortMerge sm = null;
         try{
-            sm = new SortMerge(bigtable1Names, bigtable2Names, innerStream, outBigTableName);
+            sm = new SortMerge(bigtable1Names, bigtable2Names, innerStream, outerStream, outBigTableName);
         }
         catch(Exception e){
             System.err.println("*** join error in SortMerge constructor ***"); 
