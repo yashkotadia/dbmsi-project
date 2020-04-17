@@ -11,7 +11,7 @@ public class query implements GlobalConst {
     public static void main(String[] args) {
         //Parsing arguments:
         if (args.length != 6 || args[0] == "-h") {
-            System.out.println("Enter correct arguments: \nquery BIGTABLENAME TYPE ORDERTYPE ROWFILTER COLUMNFILTER VALUEFILTER NUMBUF\n");
+            System.out.println("Enter correct arguments: \nquery BIGTABLENAME ORDERTYPE ROWFILTER COLUMNFILTER VALUEFILTER NUMBUF\n");
             return;
         }
 
