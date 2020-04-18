@@ -187,6 +187,8 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				//Insert map1 into io_buf1
       				try {
 		    			io_buf1.Put(map1);
+		    			System.out.print("Putting map in io_buf1 ");
+		    			map1.print();
 		  			}
 		  			catch (Exception e){
 		    			throw new JoinsException(e,"IoBuf error in sortmerge");
@@ -201,6 +203,8 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				//Insert map2 into io_buf2
       				try {
 		    			io_buf2.Put(map2);
+		    			System.out.print("Putting map in io_buf2 ");
+		    			map2.print();
 		  			}
 		  			catch (Exception e){
 		    			throw new JoinsException(e,"IoBuf error in sortmerge");
@@ -233,7 +237,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				}
 	    	}
 
-	    	System.out.println("Joining two maps");
+	    	//System.out.println("Joining two maps");
 	    	//Join the two maps
 	    	if(MapUtils.CompareMapWithMap(TempMap1, TempMap2, 8) == 0){
 	    		String row1 = TempMap1.getRowLabel();
@@ -246,8 +250,8 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				
 				//Create two temp bigStreams to get all the columns for the matched row(in joined map) in each bigT
 	    		//Ordered on row labels
-	    		BigStream tempbs1 = new BigStream(bigtable1Names, 9, row1, "*", "*");
-				BigStream tempbs2 = new BigStream(bigtable2Names, 9, row2, "*", "*");
+	    		BigStream tempbs1 = new BigStream(bigtable1Names, 9, 0, row1, "*", "*");
+				BigStream tempbs2 = new BigStream(bigtable2Names, 9, 0, row2, "*", "*");
 
 				//Arraylist to store all the versions of two matched maps (Max size = 6)
 				ArrayList<Map> versions = new ArrayList<Map>();
@@ -340,6 +344,16 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 			catch (Exception e) {
 	  			throw new JoinsException(e, "SortMerge.java: error in closing streams.");
 			}
+			
+			
+			try{
+				io_buf1.close();
+				io_buf2.close();
+			}
+			catch(Exception e){
+				throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
+			}
+
 			if (temp_file_fd1 != null) {
 				try {
 			    	temp_file_fd1.deletebigT();
@@ -358,14 +372,6 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				}
 	  			temp_file_fd2 = null; 
 			}
-			
-			// try{
-			// 	io_buf1.close();
-			// 	io_buf2.close();
-			// }
-			// catch(Exception e){
-			// 	throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
-			// }
 			closeFlag = true;
 		}
 

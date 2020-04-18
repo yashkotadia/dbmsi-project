@@ -55,8 +55,8 @@ public class rowjoin implements GlobalConst{
 
 
         //Initialize two bigstreams, one on each of the two bigbigTables.
-        BigStream bs1 = new BigStream(bigtable1Names, 6, "*", colFilter, "*"); // orderType = 6
-        BigStream bs2 = new BigStream(bigtable2Names, 6, "*", colFilter, "*"); // orderType = 6
+        BigStream bs1 = new BigStream(bigtable1Names, 6, 0, "*", colFilter, "*"); // orderType = 6
+        BigStream bs2 = new BigStream(bigtable2Names, 6, 0, "*", colFilter, "*"); // orderType = 6
 
         //Initialize two bigTs to contain only most recent maps 
         bigT outerbt = new bigT(null);
@@ -94,8 +94,8 @@ public class rowjoin implements GlobalConst{
             
         }
         //Create streams on the new temp bigTs, ordered on values
-        Stream outerStream = new Stream(outerbt, 8, "*", "*", "*");
-        Stream innerStream = new Stream(innerbt, 8, "*", "*", "*");
+        Stream outerStream = new Stream(outerbt, 8, 0, "*", "*", "*");
+        Stream innerStream = new Stream(innerbt, 8, 0, "*", "*", "*");
 
         BigSortMerge sm = null;
         try{
