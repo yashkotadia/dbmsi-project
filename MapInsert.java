@@ -43,7 +43,7 @@ public class MapInsert implements GlobalConst {
             m.setValue(val);
 
             // Initialize the stream
-            BigStream s = new BigStream(bigtableName, 6, row, column, "*", false);
+            BigStream s = new BigStream(bigtableName, 6, 0, row, column, "*", false);
 
             // Delete the map with smallest timestamp
             MID resmid = null;

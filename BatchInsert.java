@@ -85,7 +85,7 @@ public class BatchInsert implements GlobalConst {
             }
 
             // Initialize the Big Stream
-            BigStream stream = new BigStream(streamBTNames, 6, "*", "*", "*");
+            BigStream stream = new BigStream(streamBTNames, 6, 0, "*", "*", "*");
 
             // Delete the old big tables & their indexes
             for(int i=0; i<5; i++) {
@@ -129,7 +129,7 @@ public class BatchInsert implements GlobalConst {
                     case 5: ordertype = 7; break;
                 }
                 bigT b = new bigT("old_"+i);
-                Stream reorderStream = new Stream(b, ordertype, "*", "*", "*");
+                Stream reorderStream = new Stream(b, ordertype, 0, "*", "*", "*");
 
                 b.deletebigT();
 

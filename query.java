@@ -25,7 +25,7 @@ public class query implements GlobalConst {
         for(int i=0; i<5; i++) bigtableNames[i] = bigtableName + "_" + (i+1);
 
         try {
-            BigStream s = new BigStream(bigtableNames, orderType, rowfilter, columnfilter, vfilter);
+            BigStream s = new BigStream(bigtableNames, orderType, 0, rowfilter, columnfilter, vfilter);
 
             while(true){
 
