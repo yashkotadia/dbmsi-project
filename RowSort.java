@@ -59,9 +59,11 @@ public class RowSort{
 			// else put it in the temporary heap file.
 
 			while( map1!=null && map2!=null ){
-				System.out.println("Stuck here");
+				//map1.print();
+				//map2.print();
 				// First stream is exhausted, put maps of 2nd stream to temporary BT
 				if(map1==null){
+					//System.out.println("Case 1");
 					tempbt.insertMap(map2.getMapByteArray());
 					while( (map2=stream2.getNext()) != null ){
 						tempbt.insertMap(map2.getMapByteArray());
@@ -73,6 +75,7 @@ public class RowSort{
 				// Thus, insert all the maps of that row to output BT
 				// Reposition Stream 1 to next row
 				else if( map1.getRowLabel().equals(map2.getRowLabel()) ){
+					//System.out.println("Case 2");
 					newBT.insertMap(map2.getMapByteArray());
 					map2.print();
 					prevRow2 = map2.getRowLabel();
@@ -86,14 +89,15 @@ public class RowSort{
 					
 					// Jump in stream1 to the next row
 					prevRow1 = map1.getRowLabel();
-					while(((map1 = stream1.getNext())!=null ) && prevRow1.equals(map2.getRowLabel())){
-						prevRow1 = map2.getRowLabel();
+					while(((map1 = stream1.getNext())!=null ) && prevRow1.equals(map1.getRowLabel())){
+						prevRow1 = map1.getRowLabel();
 					}
 				}
 				
 				// Encountered a row in stream 2 that does not contain the desired column
 				// Output the entire row to temporary BT
 				else{
+					//System.out.println("Case 3");
 					prevRow2 = map2.getRowLabel();
 					tempbt.insertMap(map2.getMapByteArray());
 
