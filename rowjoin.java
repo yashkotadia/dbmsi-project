@@ -97,9 +97,9 @@ public class rowjoin implements GlobalConst{
         Stream outerStream = new Stream(outerbt, 8, "*", "*", "*");
         Stream innerStream = new Stream(innerbt, 8, "*", "*", "*");
 
-        SortMerge sm = null;
+        BigSortMerge sm = null;
         try{
-            sm = new SortMerge(bigtable1Names, bigtable2Names, innerStream, outerStream, outBigTableName);
+            sm = new BigSortMerge(bigtable1Names, bigtable2Names, innerStream, outerStream, outBigTableName);
             System.out.println("Initialed sortmerge constructor");
         }
         catch(Exception e){
@@ -148,5 +148,6 @@ public class rowjoin implements GlobalConst{
             System.err.println ("*** Error in closing ");
             Runtime.getRuntime().exit(1);
         }
+        sysdef.close();
 	}
 }
