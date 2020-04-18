@@ -148,6 +148,14 @@ public class rowjoin implements GlobalConst{
             System.err.println ("*** Error in closing ");
             Runtime.getRuntime().exit(1);
         }
+        try{
+            bs1.close();
+            bs2.close();
+        }
+        catch(Exception e){
+            System.err.println (""+e);
+            e.printStackTrace();
+        }
         sysdef.close();
 	}
 }

@@ -123,7 +123,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       	int map1_size, map2_size;
 
       	if (done) return;
-      	System.out.println("Starting sortmerge while loop");
+      	//System.out.println("Starting sortmerge while loop");
       	while(true){
       		if(process_next_block){
       			//System.out.println("Entered next block");
@@ -187,7 +187,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				//Insert map1 into io_buf1
       				try {
 		    			io_buf1.Put(map1);
-		    			System.out.print("Putting map in io_buf1 ");
+		    			//System.out.print("Putting map in io_buf1 ");
 		    			map1.print();
 		  			}
 		  			catch (Exception e){
@@ -203,7 +203,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				//Insert map2 into io_buf2
       				try {
 		    			io_buf2.Put(map2);
-		    			System.out.print("Putting map in io_buf2 ");
+		    			//System.out.print("Putting map in io_buf2 ");
 		    			map2.print();
 		  			}
 		  			catch (Exception e){
@@ -229,9 +229,12 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       		if ((_map2 = io_buf2.Get(TempMap2)) == null){
 	      		if ((_map1 = io_buf1.Get(TempMap1)) == null){
 		  			process_next_block = true;
+		  			// io_buf1.i_buf.close();
+		  			// io_buf2.i_buf.close();
 		  			continue;                                // Process next equivalence class
 				}
 	      		else{
+	      			io_buf2.i_buf.close();
 		  			io_buf2.reread();
 		  			_map2= io_buf2.Get(TempMap2);
 				}
@@ -346,13 +349,13 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 			}
 			
 			
-			try{
-				io_buf1.close();
-				io_buf2.close();
-			}
-			catch(Exception e){
-				throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
-			}
+			// try{
+			// 	io_buf1.close();
+			// 	io_buf2.close();
+			// }
+			// catch(Exception e){
+			// 	throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
+			// }
 
 			if (temp_file_fd1 != null) {
 				try {

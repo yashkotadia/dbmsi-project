@@ -52,6 +52,7 @@ public class SpoofIbuf implements GlobalConst  {
       
       try {
 	bgt_scan = _fd.openScan();
+  //System.out.println("In SpoofIbuf: Opened bgt_scan");
       }
       catch(Exception e){
 	throw e;
@@ -149,6 +150,7 @@ public class SpoofIbuf implements GlobalConst  {
   */
   public void close(){
     bgt_scan.closescan();
+    //System.out.println("In SpoofIbuf: Closing bgt_scan");
   }
   
   

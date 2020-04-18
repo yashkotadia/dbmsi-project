@@ -213,7 +213,7 @@ public class IoBuf implements GlobalConst{
   private  boolean  flushed;        // TRUE => buffer has been flushed.
   private  int  mode;
   private  int  m_rd_from_pg;      // # of tuples read from current page
-  private  SpoofIbuf i_buf;        // gets input from a temporary file
+  SpoofIbuf i_buf;        // gets input from a temporary file
 }
 
 
