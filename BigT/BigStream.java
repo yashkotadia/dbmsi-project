@@ -20,20 +20,21 @@ public class BigStream{
     Map[]       rMap;
     boolean[]   done;
     int 		orderType;
+    int         rOrder;
     public int   outInd = 0;
     int         nStreams;
 
     /** Opens the bigtables and their streams
     */
 
-    public BigStream(String bigtableName, int orderType, String rowFilter, String columnFilter, String valueFilter)
+    public BigStream(String bigtableName, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter)
             throws HFException, InvalidTupleSizeException,
             InvalidMapSizeException, IOException,
             HFBufMgrException, HFDiskMgrException {
-        this(bigtableName, orderType, rowFilter, columnFilter, valueFilter, true);
+        this(bigtableName, orderType, rOrder, rowFilter, columnFilter, valueFilter, true);
     }
 
-    public BigStream(String bigtableName, int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+    public BigStream(String bigtableName, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
             throws HFException, InvalidTupleSizeException,
             InvalidMapSizeException, IOException,
             HFBufMgrException, HFDiskMgrException {
@@ -42,6 +43,7 @@ public class BigStream{
         for(int i=0;i<5; i++) bigtableNames[i] = bigtableName +"_" + (i+1);
 
         this.orderType = orderType;
+        this.rOrder = rOrder;
         nStreams = bigtableNames.length;
 
         bigTable = new bigT[nStreams];
@@ -50,31 +52,31 @@ public class BigStream{
         done = new boolean[nStreams];
 
         // Initialize all the BigTables and Streams
-
         for(int i=0; i<nStreams; i++){
             bigTable[i] = new bigT(bigtableNames[i]);
-            stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter, useSort);
+            stream[i] = bigTable[i].openStream(orderType, rOrder, rowFilter,columnFilter,valueFilter, useSort);
             rMap[i] = stream[i].getNext();
             if(rMap[i]==null) done[i] = true;
         }
         
     }
 
-    public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter)
+    public BigStream(String[] bigtableNames, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter)
             throws HFException, InvalidTupleSizeException,
             InvalidMapSizeException, IOException,
             HFBufMgrException, HFDiskMgrException {
 
-        this(bigtableNames, orderType, rowFilter, columnFilter, valueFilter, true);
+        this(bigtableNames, orderType, rOrder, rowFilter, columnFilter, valueFilter, true);
     }
 
 
-	public BigStream(String[] bigtableNames, int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+	public BigStream(String[] bigtableNames, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
 		throws HFException, InvalidTupleSizeException,
 				InvalidMapSizeException, IOException,
 				HFBufMgrException, HFDiskMgrException{
 
 		this.orderType = orderType;
+        this.rOrder = rOrder;
         nStreams = bigtableNames.length;
 
         bigTable = new bigT[nStreams];
@@ -86,7 +88,7 @@ public class BigStream{
 
         for(int i=0; i<nStreams; i++){
             bigTable[i] = new bigT(bigtableNames[i]);
-            stream[i] = bigTable[i].openStream(orderType,rowFilter,columnFilter,valueFilter, useSort);
+            stream[i] = bigTable[i].openStream(orderType, rOrder, rowFilter,columnFilter,valueFilter, useSort);
             rMap[i] = stream[i].getNext();
             if(rMap[i]==null) done[i] = true;
         }
@@ -111,7 +113,7 @@ public class BigStream{
 		// Check Breaking condition
         if(areAllTrue(done)) return null;
 
-		// Initialize the first null Map as minimum for further comparison
+		// Initialize the first non-null Map as minimum for further comparison
         int minInd = 0; 
         for(int i=0; i<nStreams; i++){
             if(rMap[i]!=null){
@@ -120,10 +122,18 @@ public class BigStream{
             }
         }
 
-        // Find minimum out of all streams
-        for(int i=0; i<nStreams; i++){
-            if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==1 ){
-                minInd = i;
+        // Find minimum/maximum out of all streams
+        if(rOrder==0){
+            for(int i=0; i<nStreams; i++){
+                if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==1 ){
+                    minInd = i;
+                }
+            }
+        } else {
+            for(int i=0; i<nStreams; i++){
+                if( rMap[i]!= null && MapUtils.CompareMapWithMap(rMap[minInd], rMap[i], orderType)==-1 ){
+                    minInd = i;
+                }
             }
         }
 

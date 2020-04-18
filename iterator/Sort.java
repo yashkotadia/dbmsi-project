@@ -33,7 +33,7 @@ public class Sort extends Iterator implements GlobalConst
   private int         sortFldLen;
   private int         tuple_size;
   */
-  private TupleOrder  order;
+  private RowOrder  order;
   private Iterator    _am;
   private int         _n_pages;
   private byte[][]    bufs;
@@ -175,7 +175,7 @@ public class Sort extends Iterator implements GlobalConst
     int comp_res;
     
     // set the lastElem to be the minimum value for the sort field
-    if(order.tupleOrder == TupleOrder.Ascending) {
+    if(order.rowOrder == RowOrder.Ascending) {
       try {
 	MIN_VAL(lastElem);
       } catch (UnknowAttrType e) {
@@ -223,7 +223,7 @@ public class Sort extends Iterator implements GlobalConst
       
       comp_res = MapUtils.CompareMapWithMap(cur_node.map, lastElem, orderType);  // need map_utils.java
       
-      if ((comp_res < 0 && order.tupleOrder == TupleOrder.Ascending) || (comp_res > 0 && order.tupleOrder == TupleOrder.Descending)) {
+      if ((comp_res < 0 && order.rowOrder == RowOrder.Ascending) || (comp_res > 0 && order.rowOrder == RowOrder.Descending)) {
 	// doesn't fit in current run, put into the other queue
 	try {
 	  pother_Q.enq(cur_node);
@@ -285,7 +285,7 @@ public class Sort extends Iterator implements GlobalConst
 	// need io_bufs.java
 	o_buf.init(bufs, _n_pages, map_size, temp_files[run_num], false);
 	
-	if(order.tupleOrder == TupleOrder.Ascending) {
+	if(order.rowOrder == RowOrder.Ascending) {
 		// set the last Elem to be the minimum value for the sort field
 	  try {
 	    MIN_VAL(lastElem);
@@ -382,7 +382,7 @@ public class Sort extends Iterator implements GlobalConst
 	  o_buf.init(bufs, _n_pages, map_size, temp_files[run_num], false);
 	  
 	  // set the last Elem to be the minimum value for the sort field
-	  if(order.tupleOrder == TupleOrder.Ascending) {
+	  if(order.rowOrder == RowOrder.Ascending) {
 	    try {
 	      MIN_VAL(lastElem);
 	    } catch (UnknowAttrType e) {
@@ -589,7 +589,7 @@ public class Sort extends Iterator implements GlobalConst
 	      int        sort_fld,          
 	      TupleOrder sort_order,     
 	      int        sort_fld_len,*/
-        TupleOrder sort_order,
+        RowOrder sort_order,
         Iterator am,
 	      int n_pages,
         int oType,

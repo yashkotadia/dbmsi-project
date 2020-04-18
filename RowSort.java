@@ -15,15 +15,16 @@ public class RowSort{
 	public static void main(String[] args){
 
 		// Parsing arguments:
-		if(args.length != 4){
-			System.out.println("Enter correct arguments: \nrowsort INBTNAME OUTBTNAME COLUMNNAME NUMBUF");
+		if(args.length != 5){
+			System.out.println("Enter correct arguments: \nrowsort INBTNAME OUTBTNAME ROWORDER COLUMNNAME NUMBUF");
 			return;
 		}
 
 		String inputBigTable = args[0];
 		String outputBigTable = args[1];
-		String columnName = args[2];
-		int numBuffers = Integer.parseInt(args[3]);
+		int rOrder = Integer.parseInt(args[2]);
+		String columnName = args[3];
+		int numBuffers = Integer.parseInt(args[4]);
 
 		try{
 			// Open the database
@@ -31,15 +32,17 @@ public class RowSort{
 	        SystemDefs sysdef = new SystemDefs( dbpath, 20000, numBuffers, "Clock");
 
 			// Create output BigTable
+			//System.out.println("Creating output BT");
 			bigT newBT = new bigT(outputBigTable +"_" +(1));
-			newBT.createIndex();
 
 			// Create temp heap file
 			bigT tempbt = new bigT(null);
 	  
 			// Initialize two Big Streams:
-			BigStream stream1 = new BigStream(inputBigTable, 1, "*", columnName, "*", true);
-			BigStream stream2 = new BigStream(inputBigTable, 1, "*", "*", "*",true);
+			System.out.println("Initializing the BigStreams");
+			BigStream stream1 = new BigStream(inputBigTable, 1, rOrder, "*", columnName, "*", true);
+			BigStream stream2 = new BigStream(inputBigTable, 1, rOrder, "*", "*", "*",true);
+			System.out.println("Initialized the BigStreams");
 
 			Map map1 = stream1.getNext();
 			Map map2 = stream2.getNext();
@@ -56,7 +59,7 @@ public class RowSort{
 			// else put it in the temporary heap file.
 
 			while( map1!=null && map2!=null ){
-				
+				System.out.println("Stuck here");
 				// First stream is exhausted, put maps of 2nd stream to temporary BT
 				if(map1==null){
 					tempbt.insertMap(map2.getMapByteArray());
@@ -107,7 +110,7 @@ public class RowSort{
 			stream2.close();
 
 			FileScan fs = new FileScan(tempbt.get_fileName(), "*", "*", "*");
-
+			System.out.println("Inserting Maps Not containing the column");
 			while( (map3 = fs.get_next()) !=null){
 				newBT.insertMap(map3.getMapByteArray());
 				map3.print();

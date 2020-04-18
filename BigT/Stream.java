@@ -44,24 +44,24 @@ public class Stream implements GlobalConst{
      * @param bt A BigT object
      */
 
-    public Stream(bigT bt, int orderType, String rowFilter, String columnFilter, String valueFilter)
+    public Stream(bigT bt, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter)
             throws InvalidMapSizeException,
             IOException
     {
-        this(bt, orderType, rowFilter, columnFilter, valueFilter, true);
+        this(bt, orderType, rOrder, rowFilter, columnFilter, valueFilter, true);
     }
 
 
-  public Stream(bigT bt, int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+  public Stream(bigT bt, int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
           throws InvalidMapSizeException,
           IOException
   {
 
       UseSort = useSort;
       int mapSize = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+20+2; //Taking value length to be 20 arbitrarily
-      TupleOrder[] order = new TupleOrder[2];
-      order[0] = new TupleOrder(TupleOrder.Ascending);
-      order[1] = new TupleOrder(TupleOrder.Descending);
+      RowOrder[] order = new RowOrder[2];
+      order[0] = new RowOrder(RowOrder.Ascending);
+      order[1] = new RowOrder(RowOrder.Descending);
       type = bt._itype;
       bt_name = bt.get_fileName();
 
@@ -108,7 +108,7 @@ public class Stream implements GlobalConst{
       }
 
         if (useSort)
-            sort = new Sort(order[0], scan, SORTPGNUM, orderType, mapSize);
+            sort = new Sort(order[rOrder], scan, SORTPGNUM, orderType, mapSize);
 
     } catch(Exception e){
       e.printStackTrace();

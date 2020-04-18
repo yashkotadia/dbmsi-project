@@ -1030,19 +1030,19 @@ public class bigT implements Filetype,  GlobalConst {
 	 * @exception InvalidMapSizeException Invalid tuple size
 	 * @exception IOException I/O errors
 	 */
-  public Stream openStream(int orderType, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
+  public Stream openStream(int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter, boolean useSort)
 		  throws InvalidTupleSizeException, InvalidMapSizeException,
 		  IOException
   {
-	  Stream newStream = new Stream(this, orderType, rowFilter, columnFilter, valueFilter, useSort);
+	  Stream newStream = new Stream(this, orderType, rOrder, rowFilter, columnFilter, valueFilter, useSort);
 	  return newStream;
   }
 
-	public Stream openStream(int orderType, String rowFilter, String columnFilter, String valueFilter)
+	public Stream openStream(int orderType, int rOrder, String rowFilter, String columnFilter, String valueFilter)
 			throws InvalidTupleSizeException, InvalidMapSizeException,
 			IOException
 	{
-		Stream newStream = new Stream(this, orderType, rowFilter, columnFilter, valueFilter);
+		Stream newStream = new Stream(this, orderType, rOrder, rowFilter, columnFilter, valueFilter);
 		return newStream;
 	}
   

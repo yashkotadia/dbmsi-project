@@ -24,7 +24,7 @@ public abstract class pnodePQ
   //protected AttrType              fld_type;
 
   /** the sorting order (Ascending or Descending) */
-  protected TupleOrder            sort_order;
+  protected RowOrder            sort_order;
 
   /**
    * class constructor, set <code>count</code> to <code>0</code>.
