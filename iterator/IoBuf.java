@@ -190,10 +190,10 @@ public class IoBuf implements GlobalConst{
 	}
     }
 
-  public void close(){
-    i_buf.close();
+  // public void close(){
+  //   i_buf.close();
 
-  }   
+  // }   
   
   public static final int WRITE_BUFFER =0;
   public static final int READ_BUFFER  =1;

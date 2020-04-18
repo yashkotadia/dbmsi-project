@@ -131,13 +131,13 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       			if(get_from_s1)
       				if((map1 = stream1.getNext()) == null){
       					done = true;
-      					System.out.println("stream1.getNext() returned null");
+      					//System.out.println("stream1.getNext() returned null");
       					return;
       				}
       			if(get_from_s2)
       				if((map2 = stream2.getNext()) == null){
       					done = true;
-      					System.out.println("stream2.getNext() returned null");
+      					//System.out.println("stream2.getNext() returned null");
       					return;
       				}
       			get_from_s1 = get_from_s2 = false;
@@ -229,8 +229,6 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       		if ((_map2 = io_buf2.Get(TempMap2)) == null){
 	      		if ((_map1 = io_buf1.Get(TempMap1)) == null){
 		  			process_next_block = true;
-		  			// io_buf1.i_buf.close();
-		  			// io_buf2.i_buf.close();
 		  			continue;                                // Process next equivalence class
 				}
 	      		else{
@@ -240,7 +238,6 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				}
 	    	}
 
-	    	//System.out.println("Joining two maps");
 	    	//Join the two maps
 	    	if(MapUtils.CompareMapWithMap(TempMap1, TempMap2, 8) == 0){
 	    		String row1 = TempMap1.getRowLabel();
@@ -262,7 +259,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				//iterate over temp bigstream1 and get all the columns for matched row
 				while(true){
 					if((nextMap = tempbs1.getNext()) == null){
-						System.out.println("Getting all columns for matched row in tempbs1");
+						//System.out.println("Getting all columns for matched row in tempbs1");
 						break;
 					}
 					if(nextMap.getColumnLabel().equals(newCol)){
@@ -342,7 +339,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 			try{
 				stream1.close();
 				stream2.close();
-				 System.out.println("Closed two streams");
+				//System.out.println("Closed two streams");
 			}
 			catch (Exception e) {
 	  			throw new JoinsException(e, "SortMerge.java: error in closing streams.");
