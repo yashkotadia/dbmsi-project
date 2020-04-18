@@ -71,6 +71,8 @@ public class rowjoin implements GlobalConst{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to bigT
+                System.out.print("Inserted map in outerbt: ");
+                rMap.print();
                 outerbt.insertMap(rMap.getMapByteArray());
             }
             prevMap = new Map(rMap);
@@ -84,6 +86,8 @@ public class rowjoin implements GlobalConst{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to the temp bigT
+                System.out.print("Inserted map in innerbt: ");
+                rMap.print();
                 innerbt.insertMap(rMap.getMapByteArray());
             }
             prevMap = new Map(rMap);
@@ -96,6 +100,7 @@ public class rowjoin implements GlobalConst{
         SortMerge sm = null;
         try{
             sm = new SortMerge(bigtable1Names, bigtable2Names, innerStream, outerStream, outBigTableName);
+            System.out.println("Initialed sortmerge constructor");
         }
         catch(Exception e){
             System.err.println("*** join error in SortMerge constructor ***"); 
@@ -116,6 +121,7 @@ public class rowjoin implements GlobalConst{
 
         try{
             sm.performJoin();
+             System.out.println("Performed sortmerge join");
         }
         catch(Exception e){
             System.err.println (""+e);
@@ -125,7 +131,7 @@ public class rowjoin implements GlobalConst{
         
         if (status != OK){
             //bail out
-            System.err.println ("*** Error in get next tuple ");
+            System.err.println ("*** Error in performing join");
             Runtime.getRuntime().exit(1);
         }
         try {

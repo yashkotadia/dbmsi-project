@@ -31,6 +31,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 	private bigT temp_file_fd1, temp_file_fd2;
 	private String[] bigtable1Names = new String[5];
 	private String[] bigtable2Names = new String[5];
+	private int size = 4+ROW_LABEL_SIZE+COLUMN_LABEL_SIZE+4+20+2;
 
 	public SortMerge(String[] bnames1, String[] bnames2, Stream s1, Stream s2, String outBigTableName)
 	throws JoinNewFailed ,
@@ -54,10 +55,11 @@ public class SortMerge extends Iterator implements GlobalConst{
 	    io_buf1 = new IoBuf();
 	    io_buf2 = new IoBuf();
 
-	    TempMap1 = new Map(100); //Arbitrary size of temp map 
-	    TempMap2 = new Map(100);
-	    map1 = new Map(100);
-	    map2 = new Map(100);
+	    //value size = 20 (Same as that set in stream)
+	    TempMap1 = new Map(size);  
+	    TempMap2 = new Map(size);
+	    map1 = new Map(size);
+	    map2 = new Map(size);
 
 	    if (io_buf1  == null || io_buf2  == null || TempMap1 == null || TempMap2==null
 	  			|| map1 ==  null || map1 ==null)
@@ -121,18 +123,21 @@ public class SortMerge extends Iterator implements GlobalConst{
       	int map1_size, map2_size;
 
       	if (done) return;
-
+      	System.out.println("Starting sortmerge while loop");
       	while(true){
       		if(process_next_block){
+      			System.out.println("Entered next block");
       			process_next_block = false;
       			if(get_from_s1)
       				if((map1 = stream1.getNext()) == null){
       					done = true;
+      					System.out.println("stream1.getNext() returned null");
       					return;
       				}
       			if(get_from_s2)
       				if((map2 = stream2.getNext()) == null){
       					done = true;
+      					System.out.println("stream2.getNext() returned null");
       					return;
       				}
       			get_from_s1 = get_from_s2 = false;
@@ -144,6 +149,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 				//Iterate on outer 
       			while(comp_res < 0){
       				//map1 value < map2 value
+      				System.out.println("Compare result < 0");
       				if((map1 = stream1.getNext()) == null){
       					done = true;
       					return;
@@ -156,6 +162,7 @@ public class SortMerge extends Iterator implements GlobalConst{
       			//Iterate over inner
       			while(comp_res > 0){
       				//map1 value > map2 value
+      				System.out.println("Compare result > 0");
       				if((map2 = stream2.getNext()) == null){
       					done = true;
       					return;
@@ -173,8 +180,8 @@ public class SortMerge extends Iterator implements GlobalConst{
       			TempMap1.mapCopy(map1);
       			TempMap2.mapCopy(map2);
 
-      			io_buf1.init(_bufs1, 1, 100, temp_file_fd1);
-      			io_buf2.init(_bufs2, 1, 100, temp_file_fd2);
+      			io_buf1.init(_bufs1, 1, size, temp_file_fd1);
+      			io_buf2.init(_bufs2, 1, size, temp_file_fd2);
 
       			while(MapUtils.CompareMapWithMap(map1, TempMap1, 8) == 0){
       				//Insert map1 into io_buf1
@@ -226,6 +233,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 				}
 	    	}
 
+	    	System.out.println("Joining two maps");
 	    	//Join the two maps
 	    	if(MapUtils.CompareMapWithMap(TempMap1, TempMap2, 8) == 0){
 	    		String row1 = TempMap1.getRowLabel();
@@ -233,7 +241,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 	    		String newRow = row1 + ":" + row2;
 	    		String newCol = TempMap1.getColumnLabel();
 	    		String value = TempMap1.getValue();
-
+	    		System.out.println("Joining two maps");
 				//Create two temp bigStreams to get all the columns for the matched row(in joined map) in each bigT
 	    		//Ordered on row labels
 	    		BigStream tempbs1 = new BigStream(bigtable1Names, 9, row1, "*", "*");
@@ -245,6 +253,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 				//iterate over temp bigstream1 and get all the columns for matched row
 				while(true){
 					if((nextMap = tempbs1.getNext()) == null){
+						System.out.println("Getting all columns for matched row in tempbs1");
 						break;
 					}
 					if(nextMap.getColumnLabel().equals(newCol)){
@@ -261,6 +270,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 					}
 				}
 
+				//iterate over temp bigstream1 and get all the columns for matched row
 				while(true){
 					if((nextMap = tempbs2.getNext()) == null){
 						break;
@@ -322,7 +332,7 @@ public class SortMerge extends Iterator implements GlobalConst{
 			try{
 				stream1.close();
 				stream2.close();
-
+				 System.out.println("Closed two streams");
 			}
 			catch (Exception e) {
 	  			throw new JoinsException(e, "SortMerge.java: error in closing streams.");
@@ -346,13 +356,13 @@ public class SortMerge extends Iterator implements GlobalConst{
 	  			temp_file_fd2 = null; 
 			}
 			
-			try{
-				io_buf1.close();
-				io_buf2.close();
-			}
-			catch(Exception e){
-				throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
-			}
+			// try{
+			// 	io_buf1.close();
+			// 	io_buf2.close();
+			// }
+			// catch(Exception e){
+			// 	throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
+			// }
 			closeFlag = true;
 		}
 
