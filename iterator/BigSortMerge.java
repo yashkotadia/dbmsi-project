@@ -245,7 +245,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 	    		String newRow = row1 + ":" + row2;
 	    		String newCol = TempMap1.getColumnLabel();
 	    		String value = TempMap1.getValue();
-	    		int minTimeStamp = Math.min(TempMap1.getTimeStamp(), TempMap2.getTimeStamp());
+	    		//int minTimeStamp = Math.min(TempMap1.getTimeStamp(), TempMap2.getTimeStamp());
 	    		System.out.println("Joining two maps");
 				
 				//Create two temp bigStreams to get all the columns for the matched row(in joined map) in each bigT
@@ -282,7 +282,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 						break;
 					}
 					if(nextMap.getColumnLabel().equals(newCol)){
-						if(!(nextMap.getTimeStamp() == minTimeStamp))
+						//if(!(nextMap.getTimeStamp() == minTimeStamp))
 							versions.add(nextMap);
 					}
 					else{
