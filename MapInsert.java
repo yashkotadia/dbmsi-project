@@ -96,8 +96,8 @@ public class MapInsert implements GlobalConst {
             int ordertype = 6;
             switch(storageType){
                     case 2: ordertype = 6; break;
-                    case 3: ordertype = 2; break;
-                    case 4: ordertype = 2; break;
+                    case 3: ordertype = 10; break;
+                    case 4: ordertype = 11; break;
                     case 5: ordertype = 7; break;
             }
 

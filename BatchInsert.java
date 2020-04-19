@@ -124,8 +124,8 @@ public class BatchInsert implements GlobalConst {
 
                 int ordertype = 1;
                 switch(i){
-                    case 3: ordertype = 2; break;
-                    case 4: ordertype = 2; break;
+                    case 3: ordertype = 10; break;
+                    case 4: ordertype = 11; break;
                     case 5: ordertype = 7; break;
                 }
                 bigT b = new bigT("old_"+i);
