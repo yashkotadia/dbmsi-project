@@ -221,18 +221,41 @@ public class MapUtils
 				if(m1_s.compareTo(m2_s)>0) return 1;
 				if(m1_s.compareTo(m2_s)<0) return -1;
 
-//				//Till here, row label has matched
-//
-//				m1_i = m1.getTimeStamp();
-//				m2_i = m2.getTimeStamp();
-//
-//				if (m1_i <  m2_i) return 1;
-//				if (m1_i >  m2_i) return -1;
+				return 0;
+
+			case 10:
+				// orderType: column labels
+				m1_s = m1.getColumnLabel();
+				m2_s = m2.getColumnLabel();
+
+				if(m1_s.compareTo(m2_s)>0) return 1;
+				if(m1_s.compareTo(m2_s)<0) return -1;
 
 				return 0;
 
+			case 11: 
+				// order type: column label, row label for storage type 2
+				
+				// Compare two strings
+				
+				m1_s = m1.getColumnLabel();
+				m2_s = m2.getColumnLabel();
+
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				//Till here, column label has matched
+				
+				m1_s = m1.getRowLabel();
+				m2_s = m2.getRowLabel();
+
+				if(m1_s.compareTo( m2_s)>0)return 1;
+				if(m1_s.compareTo( m2_s)<0)return -1;
+				
+				return 0;
+
 			default:
-				throw new MapUtilsException(null, "orderType < 1 or > 5 is caught by MapUtils.java");
+				throw new MapUtilsException(null, "Invalid orderType is caught by MapUtils.java");
 		}
 	}
 
