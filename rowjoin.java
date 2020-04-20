@@ -71,8 +71,8 @@ public class rowjoin implements GlobalConst{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to bigT
-                System.out.print("Inserted map in outerbt: ");
-                rMap.print();
+                // System.out.print("Inserted map in outerbt: ");
+                // rMap.print();
                 outerbt.insertMap(rMap.getMapByteArray());
             }
             prevMap = new Map(rMap);
@@ -86,8 +86,8 @@ public class rowjoin implements GlobalConst{
             }
             if(prevMap == null || !(prevMap.getRowLabel().equals(rMap.getRowLabel()) && prevMap.getColumnLabel().equals(rMap.getColumnLabel()))){
                 //Output this map to the temp bigT
-                System.out.print("Inserted map in innerbt: ");
-                rMap.print();
+                // System.out.print("Inserted map in innerbt: ");
+                // rMap.print();
                 innerbt.insertMap(rMap.getMapByteArray());
             }
             prevMap = new Map(rMap);
@@ -108,16 +108,6 @@ public class rowjoin implements GlobalConst{
             System.err.println (""+e);
             e.printStackTrace();
         }
-
-        // try{
-        //     while ((m = sm.get_next()) != null)
-        //         m.print();
-        // }
-        // catch (Exception e){
-        //     System.err.println (""+e);
-        //     e.printStackTrace();
-        //     status = FAIL;
-        // }
 
         try{
             sm.performJoin();
