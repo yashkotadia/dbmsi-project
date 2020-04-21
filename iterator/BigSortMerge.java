@@ -269,7 +269,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 						Map temp = new Map(nextMap);
 						temp.setRowLabel(newRow);
 						String tempCol = temp.getColumnLabel();
-						temp.setColumnLabel("r1_" + tempCol);
+						temp.setColumnLabel("left_" + tempCol);
 						System.out.print("Inserting ");
 						temp.print();
 						outputBT.insertMap(temp.getMapByteArray());
@@ -289,7 +289,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 						Map temp = new Map(nextMap);
 						temp.setRowLabel(newRow);
 						String tempCol = temp.getColumnLabel();
-						temp.setColumnLabel("r2_" + tempCol);
+						temp.setColumnLabel("right_" + tempCol);
 						System.out.print("Inserting ");
 						temp.print();
 						outputBT.insertMap(temp.getMapByteArray());
