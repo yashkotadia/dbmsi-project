@@ -250,8 +250,8 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 				
 				//Create two temp bigStreams to get all the columns for the matched row(in joined map) in each bigT
 	    		//Ordered on row labels
-	    		BigStream tempbs1 = new BigStream(bigtable1Names, 9, 0, row1, "*", "*");
-				BigStream tempbs2 = new BigStream(bigtable2Names, 9, 0, row2, "*", "*");
+	    		BigStream tempbs1 = new BigStream(bigtable1Names, 9, 0, row1, "*", "*", false);
+				BigStream tempbs2 = new BigStream(bigtable2Names, 9, 0, row2, "*", "*", false);
 
 				//Arraylist to store all the versions of two matched maps (Max size = 6)
 				ArrayList<Map> versions = new ArrayList<Map>();
