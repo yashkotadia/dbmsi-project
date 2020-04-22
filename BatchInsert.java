@@ -36,6 +36,11 @@ public class BatchInsert implements GlobalConst {
 
             String line = br.readLine();
 
+            String UTF8_BOM = "\uFEFF";
+            if(line.startsWith(UTF8_BOM)){
+                line=line.substring(1).trim();
+            }
+
             bigT tempbt = new bigT(null);
             streamBTNames[5] = tempbt.get_fileName();
 
