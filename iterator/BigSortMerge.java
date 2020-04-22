@@ -188,7 +188,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				try {
 		    			io_buf1.Put(map1);
 		    			//System.out.print("Putting map in io_buf1 ");
-		    			map1.print();
+		    			//map1.print();
 		  			}
 		  			catch (Exception e){
 		    			throw new JoinsException(e,"IoBuf error in sortmerge");
@@ -204,7 +204,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       				try {
 		    			io_buf2.Put(map2);
 		    			//System.out.print("Putting map in io_buf2 ");
-		    			map2.print();
+		    			//map2.print();
 		  			}
 		  			catch (Exception e){
 		    			throw new JoinsException(e,"IoBuf error in sortmerge");
