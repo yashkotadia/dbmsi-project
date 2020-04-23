@@ -68,7 +68,7 @@ public class getCounts implements GlobalConst {
 
         int rowCnt = 0;
         try{
-            BigStream s = new BigStream(bigtableNames, 1, "*", "*", "*");
+            BigStream s = new BigStream(bigtableNames, 1, 0, "*", "*", "*");
             String prevRow = "";
 
             while(true){
@@ -100,7 +100,7 @@ public class getCounts implements GlobalConst {
 
         int colCnt = 0;
         try{
-            BigStream s = new BigStream(bigtableNames, 2, "*", "*", "*");
+            BigStream s = new BigStream(bigtableNames,2, 0, "*", "*", "*");
             String prevCol = "";
 
             while(true){
