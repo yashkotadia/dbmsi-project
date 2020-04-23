@@ -99,7 +99,7 @@ public class rowjoin implements GlobalConst{
 
         BigSortMerge sm = null;
         try{
-            sm = new BigSortMerge(bigtable1Names, bigtable2Names, innerStream, outerStream, outBigTableName);
+            sm = new BigSortMerge(bigtable1Names, bigtable2Names, outerStream, innerStream, outBigTableName);
             System.out.println("Initialed sortmerge constructor");
         }
         catch(Exception e){
