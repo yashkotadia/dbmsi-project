@@ -93,6 +93,16 @@ public class rowjoin implements GlobalConst{
             prevMap = new Map(rMap);
             
         }
+
+        try{
+            bs1.close();
+            bs2.close();
+        }
+        catch(Exception e){
+            System.err.println (""+e);
+            e.printStackTrace();
+        }
+        
         //Create streams on the new temp bigTs, ordered on values
         Stream outerStream = new Stream(outerbt, 8, 0, "*", "*", "*");
         Stream innerStream = new Stream(innerbt, 8, 0, "*", "*", "*");
@@ -138,14 +148,7 @@ public class rowjoin implements GlobalConst{
             System.err.println ("*** Error in closing ");
             Runtime.getRuntime().exit(1);
         }
-        try{
-            bs1.close();
-            bs2.close();
-        }
-        catch(Exception e){
-            System.err.println (""+e);
-            e.printStackTrace();
-        }
+        
         try{
             outerbt.deletebigT();
             innerbt.deletebigT();
