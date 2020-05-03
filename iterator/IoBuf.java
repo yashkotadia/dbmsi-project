@@ -65,7 +65,7 @@ public class IoBuf implements GlobalConst{
       
       if (m_wr_to_buf == m_in_buf)                // Buffer full?
 	{
-    System.out.println("Buffer is full, and flushing now");
+    //System.out.println("Buffer is full, and flushing now");
 	  flush();                                // Flush it
 	  m_wr_to_pg = 0; m_wr_to_buf = 0;        // Initialize page info
 	  curr_page  = 0;
