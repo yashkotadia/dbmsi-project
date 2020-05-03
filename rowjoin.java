@@ -146,6 +146,14 @@ public class rowjoin implements GlobalConst{
             System.err.println (""+e);
             e.printStackTrace();
         }
+        try{
+            outerbt.deletebigT();
+            innerbt.deletebigT();
+        }
+        catch(Exception e){
+            System.err.println (""+e);
+            e.printStackTrace();
+        }
         sysdef.close();
 	}
 }

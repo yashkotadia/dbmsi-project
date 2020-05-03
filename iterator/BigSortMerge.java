@@ -71,7 +71,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 	  	// Two buffer pages to store equivalence classes
       	// NOTE -- THESE PAGES ARE NOT OBTAINED FROM THE BUFFER POOL
       	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      	_n_pages = 1;
+      	_n_pages = 5;
       	_bufs1 = new byte [_n_pages][MINIBASE_PAGESIZE];
       	_bufs2 = new byte [_n_pages][MINIBASE_PAGESIZE];
 
@@ -229,10 +229,11 @@ public class BigSortMerge extends Iterator implements GlobalConst{
       		if ((_map2 = io_buf2.Get(TempMap2)) == null){
 	      		if ((_map1 = io_buf1.Get(TempMap1)) == null){
 		  			process_next_block = true;
+		  			//io_buf1.i_buf.close();
 		  			continue;                                // Process next equivalence class
 				}
 	      		else{
-	      			io_buf2.i_buf.close();
+	      			//io_buf2.i_buf.close();
 		  			io_buf2.reread();
 		  			_map2= io_buf2.Get(TempMap2);
 				}
@@ -278,7 +279,7 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 					}
 				}
 
-				//iterate over temp bigstream1 and get all the columns for matched row
+				//iterate over temp bigstream2 and get all the columns for matched row
 				while(true){
 					if((nextMap = tempbs2.getNext()) == null){
 						break;
@@ -354,6 +355,13 @@ public class BigSortMerge extends Iterator implements GlobalConst{
 			// }
 			// catch(Exception e){
 			// 	throw new JoinsException(e, "SortMerge.java: error in closing IoBuf");
+			// }
+
+			// try{
+			// 	io_buf1.i_buf.close();
+			// }
+			// catch(Exception e){
+			// 	throw new JoinsException(e, "Error closing io_buf1");
 			// }
 
 			if (temp_file_fd1 != null) {
