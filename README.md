@@ -8,4 +8,4 @@
   <li>Efficiently implemented insertions/deletions and designed the query optimization engine leveraging external sorting.</li>
 </ul>
 
-### [Link to Report!](https://github.com/yashkotadia/dbmsi-project/blob/master/Phase%203%20Report.pdf)
+This [Report](https://github.com/yashkotadia/dbmsi-project/blob/master/Phase%203%20Report.pdf) summarizes our architecture and results.
