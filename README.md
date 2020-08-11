@@ -7,3 +7,5 @@
   <li>Implemented the Sort Merge Join operation which is not supported by Google’s BigTable service currently.</li>
   <li>Efficiently implemented insertions/deletions and designed the query optimization engine leveraging external sorting.</li>
 </ul>
+
+### [Link to Report!](https://github.com/yashkotadia/dbmsi-project/blob/master/Phase%203%20Report.pdf)
